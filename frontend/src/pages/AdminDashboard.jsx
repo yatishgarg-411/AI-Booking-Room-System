@@ -27,15 +27,14 @@ const ContentArea = styled.div`
 
 const AdminDashboard = () => {
   return (
-  
-    <DashboardWrapper>
+    <><Header /><DashboardWrapper>
       <AdminSidebar />
       <ContentArea>
-        
-   <Outlet/>
+
+        <Outlet />
 
       </ContentArea>
-    </DashboardWrapper>
+    </DashboardWrapper></>
   );
 };
 

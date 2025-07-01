@@ -10,6 +10,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import DashboardOverview from './components/admin/DashboardOverview';
 import RoomManagement from './components/admin/RoomManagement';
 import Header from './components/shared/Header';
+import ProfilePage from './components/shared/ProfilePage';
 
 
 
@@ -19,7 +20,6 @@ function App() {
       <AuthProvider>
         <DataProvider>
           <BrowserRouter>
-          <Header/>
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path="/dashboard" element={<AdminDashboard />}>
@@ -29,6 +29,7 @@ function App() {
                 <Route path="conflicts" element={<ConflictResolver />} />
                 <Route path="analytics" element={<UsageAnalytics />} />
                 <Route path="predictions" element={<PredictionInsights />} />
+                <Route path="profile" element={<ProfilePage />}/>
               </Route>
             </Routes>
 

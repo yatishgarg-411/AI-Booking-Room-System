@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Building2, Mail, Lock, User, Shield } from 'lucide-react';
+import axios from 'axios';
 import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const PageWrapper = styled.div`
   min-height: 100vh;
@@ -150,6 +153,8 @@ const ForgotLink = styled.a`
 `;
 
 const LoginPage = () => {
+  const {setToken} = useAuth();
+  const navigate=useNavigate();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: '',
@@ -165,9 +170,60 @@ const LoginPage = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     // purely frontend: just log to console
+    if (isLogin) {
+      const loginForm = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        role: 'user'
+      });
+      try {
+        const res = await axios.post(`http://localhost:8000/${formData.role}/login`, loginForm);
+        alert(res.data.msg);
+        setToken(res.data.token);
+        if(formData.role ==='admin'){navigate('/dashboard');}
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          alert("User doesnot exists!!");
+          setIsLogin(false);
+        }
+      }
+
+    }
+
+    else {
+      const signupForm = {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      };
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        role: 'user'
+      });
+
+      try {
+        const res = await axios.post(`http://localhost:8000/${formData.role}/signup`, signupForm);
+        alert(res.data.msg);
+
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          alert("User already exists!!");
+          setIsLogin(true);
+        }
+      }
+    }
+
     console.log('Form submitted:', formData);
   };
 

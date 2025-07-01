@@ -7,9 +7,7 @@ import {
   BarChart3,
   Bell,
   User,
-  LogOut,
-  Menu,
-  X
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useData } from '../../contexts/DataContext';
@@ -19,7 +17,6 @@ const Header = () => {
   const { user, logout } = useAuth();
   const { getAnalytics } = useData();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
@@ -34,9 +31,9 @@ const Header = () => {
   ];
 
   const notifications = [
-    { id: 1, message: 'Room 3 booking confirmed for 2:00 PM', time: '5 min ago', type: 'success' },
-    { id: 2, message: 'Conflict detected in Room 2', time: '10 min ago', type: 'warning' },
-    { id: 3, message: 'Weekly usage report available', time: '1 hour ago', type: 'info' }
+    { id: 1, message: 'Room 3 booking confirmed for 2:00 PM', time: '5 min ago' },
+    { id: 2, message: 'Conflict detected in Room 2', time: '10 min ago' },
+    { id: 3, message: 'Weekly usage report available', time: '1 hour ago' }
   ];
 
   return (
@@ -71,15 +68,15 @@ const Header = () => {
               <div style={{ padding: '0.5rem', background: '#2563eb', borderRadius: '0.5rem' }}>
                 <Building2 color="white" size={24} />
               </div>
-              <div style={{ display: 'none', smDisplay: 'block' }}>
+              <div>
                 <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#111827' }}>Smart Rooms</h1>
                 <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>Intelligent Booking</p>
               </div>
             </div>
           </div>
 
-          {/* Desktop Navigation */}
-          <nav style={{ display: 'none', mdDisplay: 'flex', gap: '2rem' }}>
+          {/* Navigation */}
+          <nav style={{ display: 'flex', gap: '2rem' }}>
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive =
@@ -113,24 +110,28 @@ const Header = () => {
           {/* Right Side */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             {/* Real-time Stats */}
-            <div style={{ display: 'none', lgDisplay: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.875rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{
-                  width: '0.5rem',
-                  height: '0.5rem',
-                  background: '#22c55e',
-                  borderRadius: '9999px',
-                  animation: 'pulse 2s infinite'
-                }}></div>
+                <div
+                  style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    background: '#22c55e',
+                    borderRadius: '9999px',
+                    animation: 'pulse 2s infinite'
+                  }}
+                ></div>
                 <span style={{ color: '#4b5563' }}>{analytics.availableRooms} Available</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{
-                  width: '0.5rem',
-                  height: '0.5rem',
-                  background: '#ef4444',
-                  borderRadius: '9999px'
-                }}></div>
+                <div
+                  style={{
+                    width: '0.5rem',
+                    height: '0.5rem',
+                    background: '#ef4444',
+                    borderRadius: '9999px'
+                  }}
+                ></div>
                 <span style={{ color: '#4b5563' }}>{analytics.bookedRooms} Booked</span>
               </div>
             </div>
@@ -166,7 +167,7 @@ const Header = () => {
                     justifyContent: 'center'
                   }}
                 >
-                  3
+                  {notifications.length}
                 </span>
               </button>
               <AnimatePresence>
@@ -225,18 +226,20 @@ const Header = () => {
                   cursor: 'pointer'
                 }}
               >
-                <div style={{
-                  width: '2rem',
-                  height: '2rem',
-                  background: '#2563eb',
-                  borderRadius: '9999px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
+                <div
+                  style={{
+                    width: '2rem',
+                    height: '2rem',
+                    background: '#2563eb',
+                    borderRadius: '9999px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
                   <User color="white" size={16} />
                 </div>
-                <div style={{ display: 'none', smDisplay: 'block', textAlign: 'left' }}>
+                <div style={{ textAlign: 'left' }}>
                   <p style={{ fontWeight: 500, color: '#111827' }}>{user?.name}</p>
                   <p style={{ fontSize: '0.75rem', color: '#6b7280', textTransform: 'capitalize' }}>{user?.role}</p>
                 </div>
