@@ -16,11 +16,15 @@ async def user_signup(user:User_Signup):
 
 @router.post("/user/login")
 async def user_login(user: User_Login):
-    existing = await user_collection.find_one({'email': user.email, 'password': user.password} )
+    existing = await user_collection.find_one({'email': user.email})
     if not existing:
-        raise HTTPException(status_code=404, detail="user does not exiats")
-    token=create_token({'email':existing['email']})
-    return {'msg': "Login Successful",'token':token}
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    if existing['password'] != user.password:
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    
+    token = create_token({'email': existing['email']})
+    return {'msg': "Login Successful", 'token': token}
 
 @router.post("/admin/signup")
 async def user_signup(user:User_Signup):
@@ -32,8 +36,12 @@ async def user_signup(user:User_Signup):
 
 @router.post("/admin/login")
 async def user_login(user: User_Login):
-    existing = await admin_collection.find_one({'email': user.email, 'password': user.password})
+    existing = await admin_collection.find_one({'email': user.email})
     if not existing:
-        raise HTTPException(status_code=404, detail="user does not exiats")
-    token=create_token({'email':existing['email']})
-    return {'msg': "Login Successful",'token':token}
+        raise HTTPException(status_code=404, detail="User does not exist")
+    
+    if existing['password'] != user.password:
+        raise HTTPException(status_code=401, detail="Incorrect password")
+    
+    token = create_token({'email': existing['email']})
+    return {'msg': "Login Successful", 'token': token}

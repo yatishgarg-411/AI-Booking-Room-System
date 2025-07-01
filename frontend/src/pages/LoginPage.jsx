@@ -194,6 +194,8 @@ const LoginPage = () => {
         if (error.response && error.response.status === 404) {
           alert("User doesnot exists!!");
           setIsLogin(false);
+        }else if(error.response && error.response.status === 401){
+          alert("Incorrect Password!!");
         }
       }
 
