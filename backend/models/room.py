@@ -9,10 +9,18 @@ class BookingInfo(BaseModel):
     
 
 class Room(BaseModel):
+    id: str
     name: str
     floor: str
     capacity: int
     features: List[str]
     status: str = Field(default="available")
+    currentBooking: Optional[BookingInfo] = None
+    nextBooking: Optional[BookingInfo] = None    
+
+
+class UpdateRoom(BaseModel):
+    features: Optional[List[str]] = None
+    status: Optional[str]=None
     currentBooking: Optional[BookingInfo] = None
     nextBooking: Optional[BookingInfo] = None    

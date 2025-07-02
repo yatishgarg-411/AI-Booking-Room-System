@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, Search, Users, MapPin, Eye, MoreVertical } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import styled from 'styled-components';
+import RoomDetailsModal from './RoomDetailsModel';
 
 const Container = styled.div`
   padding: 1.5rem;
@@ -90,6 +91,8 @@ const RoomManagement = () => {
   const { rooms } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFloor, setFilterFloor] = useState('');
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [showRoomModal, setShowRoomModal] = useState(false);
 
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -247,7 +250,7 @@ const RoomManagement = () => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <button style={{ color: '#9ca3af' }}>
+                        <button style={{ color: '#9ca3af' }} onClick={() => { setSelectedRoom(room); setShowRoomModal(true); }}>
                           <Eye size={16} />
                         </button>
                         <button style={{ color: '#10b981' }}>
@@ -305,6 +308,13 @@ const RoomManagement = () => {
             Clear filters
           </button>
         </motion.div>
+      )}
+
+      {showRoomModal && selectedRoom && (
+        <RoomDetailsModal
+          room={selectedRoom}
+          onClose={() => { setShowRoomModal(false); setSelectedRoom(null); }}
+        />
       )}
     </Container>
   );

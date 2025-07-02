@@ -11,6 +11,7 @@ import DashboardOverview from './components/admin/DashboardOverview';
 import RoomManagement from './components/admin/RoomManagement';
 import Header from './components/shared/Header';
 import ProfilePage from './components/shared/ProfilePage';
+import RoomDetailsModal from './components/admin/RoomDetailsModel';
 
 
 
@@ -22,7 +23,9 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<LoginPage />} />
+              <Route path='test' element={<RoomDetailsModal/>}></Route>
               <Route path="/dashboard" element={<AdminDashboard />}>
+
                 <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<DashboardOverview />} />
                 <Route path="rooms" element={<RoomManagement />} />
