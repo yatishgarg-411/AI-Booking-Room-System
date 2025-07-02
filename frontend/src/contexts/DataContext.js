@@ -1,75 +1,27 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { format, addDays } from 'date-fns';
+import axios from'axios';
 
 const DataContext = createContext();
 
-export const useData = () => {
-  const context = useContext(DataContext);
-  if (!context) {
-    throw new Error('useData must be used within a DataProvider');
-  }
-  return context;
-};
+
 
 export const DataProvider = ({ children }) => {
-  const [rooms, setRooms] = useState([
-    {
-      id: 'room-1',
-      name: 'Room 1',
-      capacity: 4,
-      features: ['Quiet', 'AC'],
-      status: 'available',
-      floor: 1,
-      nextBooking: {
-        startTime: '14:00',
-        endTime: '15:00',
-      },
-    },
-    {
-      id: 'room-2',
-      name: 'Room 2',
-      capacity: 6,
-      features: ['Whiteboard', 'Projector'],
-      status: 'booked',
-      floor: 1,
-      currentBooking: {
-        bookedBy: 'Riya Sharma',
-        startTime: '13:00',
-        endTime: '14:30',
-        userId: 'user-1',
-      },
-    },
-    {
-      id: 'room-3',
-      name: 'Room 3',
-      capacity: 10,
-      features: ['AC', 'Projector', 'Video Conference'],
-      status: 'in_process',
-      floor: 2,
-      currentBooking: {
-        bookedBy: 'Ayush Kumar',
-        startTime: '15:00',
-        endTime: '16:00',
-        userId: 'user-2',
-      },
-    },
-    {
-      id: 'room-4',
-      name: 'Room 4',
-      capacity: 8,
-      features: ['Whiteboard', 'AC', 'Near Window'],
-      status: 'available',
-      floor: 2,
-    },
-    {
-      id: 'room-5',
-      name: 'Room 5',
-      capacity: 12,
-      features: ['Video Conference', 'Projector', 'Sound System'],
-      status: 'available',
-      floor: 3,
-    },
-  ]);
+  const [rooms, setRooms] = useState([]);
+
+  const fetchRooms = async () => {
+    try{
+      const res= await axios.get(`http://localhost:8000/rooms`);
+      setRooms(res.data);
+    }catch(error){
+      alert(error);
+    }
+  }
+
+  useEffect(()=>{
+    fetchRooms();
+  },[rooms]);
+  
 
   const [bookings, setBookings] = useState([
     {
@@ -178,4 +130,17 @@ export const DataProvider = ({ children }) => {
       {children}
     </DataContext.Provider>
   );
+};
+
+
+
+
+
+export const useData = () => {
+  
+  const context = useContext(DataContext);
+  if (!context) {
+    throw new Error('useData must be used within a DataProvider');
+  }
+  return context;
 };

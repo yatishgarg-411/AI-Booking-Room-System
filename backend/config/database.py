@@ -10,3 +10,4 @@ client=AsyncIOMotorClient(MONGOURI)
 db=client['Hotel']
 user_collection=db['users']
 admin_collection=db['admins']
+rooms_collection=db['rooms']
