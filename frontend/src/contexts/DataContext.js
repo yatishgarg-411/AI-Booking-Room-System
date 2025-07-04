@@ -7,6 +7,7 @@ const DataContext = createContext();
 
 
 export const DataProvider = ({ children }) => {
+  //Yha Hmare Rooms ka data aara hai
   const [rooms, setRooms] = useState([]);
 
   const fetchRooms = async () => {
@@ -18,38 +19,24 @@ export const DataProvider = ({ children }) => {
     }
   }
 
-  useEffect(()=>{
-    fetchRooms();
-  },[rooms]);
+  
   
 
-  const [bookings, setBookings] = useState([
-    {
-      id: 'booking-1',
-      roomId: 'room-3',
-      roomName: 'Room 3',
-      userId: 'user-1',
-      userName: 'Current User',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      startTime: '14:00',
-      endTime: '15:00',
-      status: 'upcoming',
-      features: ['AC', 'Projector'],
-      notes: 'Team standup meeting',
-    },
-    {
-      id: 'booking-2',
-      roomId: 'room-2',
-      roomName: 'Room 2',
-      userId: 'user-1',
-      userName: 'Current User',
-      date: format(addDays(new Date(), -1), 'yyyy-MM-dd'),
-      startTime: '11:00',
-      endTime: '12:00',
-      status: 'completed',
-      features: ['Whiteboard'],
-    },
-  ]);
+  const [bookings,setBookings]=useState([]);
+
+  const fetchBookings = async () => {
+    try{
+      const res= await axios.get(`http://localhost:8000/room/bookings/all`);
+      setBookings(res.data);
+    }catch(error){
+      alert(error);
+    }
+  }
+
+  useEffect(()=>{
+    fetchRooms();
+    fetchBookings();
+  },[bookings]);
 
   const [conflicts, setConflicts] = useState([
     {
@@ -70,6 +57,7 @@ export const DataProvider = ({ children }) => {
     );
   };
 
+  //Add new Booking
   const addBooking = newBooking => {
     const booking = {
       ...newBooking,
