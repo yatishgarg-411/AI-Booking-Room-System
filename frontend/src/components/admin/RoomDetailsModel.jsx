@@ -1,28 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
-import { 
-  X, 
-  ChevronLeft, 
-  ChevronRight, 
-  User,
-  CheckCircle,
-  XCircle,
-  RotateCcw,
-  History,
-  Users, 
-  Wifi, 
-  Monitor, 
-  Volume2, 
-  Wind, 
-  MapPin,
-  Clock,
-  Calendar,
-  Edit3,
-  Settings,
-  Trash2,
-  Plus,
-  AlertCircle
+import { X, ChevronLeft,  ChevronRight,  User, CheckCircle, XCircle, RotateCcw, History, Users,  Wifi,  Monitor,  Volume2,  Wind,  MapPin, Edit3, Settings, Trash2, Plus,
 } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -50,24 +29,20 @@ function displayTime(timeStr) {
   return timeStr.length >= 5 ? timeStr.slice(0,5) : timeStr;
 }
 
-const RoomDetailsModal = ({
-  room,
-  onClose,
-  onEdit,
-  onDelete
-}) => {
+const RoomDetailsModal = ({room,onClose,initialTab}) => {
+  console.log(initialTab);
   const { fetchRooms, fetchBookings, bookings } = useData();
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState('details');//Initially Room Details Appears by default
+  const [activeTab, setActiveTab] = useState(initialTab);//Initially Room Details Tab Appears by default
   const [showExtendModal, setShowExtendModal] = useState(false);//TO Toggle extend booking form
   const [bookingError,setBookingError]=useState('');
   const [showBookModal, setShowBookModal] = useState(false);//TO TOGGLE BOOK ROOM FORM
   const [extendTime, setExtendTime] = useState('');
   const [extendDate, setExtendDate] = useState('');
   const [extendError, setExtendError] = useState('');
-  const [allRoomBookings, setAllRoomBookings] = useState([]);
-  const [computedStatus, setComputedStatus] = useState('available');
+  const [allRoomBookings, setAllRoomBookings] = useState([]);//All Bookings of the particular room are fetched here
+  const [computedStatus, setComputedStatus] = useState('');
   const [statusColor, setStatusColor] = useState({ background: '#d1fae5', color: '#065f46', border: '1px solid #bbf7d0' });
   const [bookingForm, setBookingForm] = useState({
     bookedBy: user?.email || '',
@@ -102,7 +77,7 @@ const RoomDetailsModal = ({
   // Helper: determine status from bookings
   useEffect(() => {
     const now = new Date();
-    let status = 'available';
+      let status = 'available';
     
     // Check if there's an ongoing booking
     for (const b of allRoomBookings) {
@@ -198,6 +173,7 @@ const RoomDetailsModal = ({
   };
 
   const getStatusText = (status) => {
+    console.log(status);
     switch (status) {
       case 'unavailable':
         return 'Unavailable';
@@ -205,8 +181,6 @@ const RoomDetailsModal = ({
         return 'Available';
       case 'booked':
         return 'Booked';
-      case 'in_process':
-        return 'In Process';
       default:
         return 'Unknown';
     }
@@ -234,7 +208,7 @@ const RoomDetailsModal = ({
       const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   
-      const res = await axios.patch(
+       await axios.patch(
         `http://localhost:8000/booking/update/${ongoing.bookingId}`,
         { 'endTime': currentTime, 'bookingEndDate': today }
       );
@@ -347,12 +321,6 @@ const RoomDetailsModal = ({
     { id: 'details', label: 'Room Details', icon: MapPin },
     { id: 'bookings', label: 'Booking History', icon: History },
     { id: 'settings', label: 'Settings', icon: Settings }
-  ];
-
-  const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00'
   ];
 
   // Inline style helpers

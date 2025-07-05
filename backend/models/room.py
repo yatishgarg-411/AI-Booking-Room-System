@@ -46,7 +46,15 @@ class UpdateRoom(BaseModel):
     features: Optional[List[str]]=None
 
      
+class Room(BaseModel):
+    id: str
+    name: str
+    floor: str
+    capacity: int
+    features: List[str]
+    status: str = Field(default="available")
 
+   
 class RoomBooking(BaseModel):
     bookingId:str
     roomId:str

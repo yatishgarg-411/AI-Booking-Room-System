@@ -1,4 +1,4 @@
-import React, { use, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, Search, Users, MapPin, Eye, MoreVertical } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -89,12 +89,12 @@ const Tbody = styled.tbody`
 
 const RoomManagement = () => {
 
-  const { rooms , fetchRooms } = useData();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterFloor, setFilterFloor] = useState('');
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [showRoomModal, setShowRoomModal] = useState(false);
-  
+  const { rooms , bookings,  fetchRooms } = useData();
+  const [searchTerm, setSearchTerm] = useState('');//Use State for search input string
+  const [filterFloor, setFilterFloor] = useState('');//Used to store value of Floor filter selected
+  const [selectedRoom, setSelectedRoom] = useState(null);//used to check which room is clicked to view info
+  const [showRoomModal, setShowRoomModal] = useState(false);// To open Room Details Model Component
+  const [initialTab,setInitialTab] = useState('details');//When Show Room Details Model Component Appears The initial Tab to display
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFloor = !filterFloor || room.floor.toString() === filterFloor;
@@ -106,12 +106,20 @@ const RoomManagement = () => {
   useEffect(()=>{
     fetchRooms();
   },[]);
+
+
+
+  const findBookingId = (id) => {
+    const booking = bookings.find(b=>b.roomId === id);
+    return booking.bookedBy;
+  };
+
   return (
     <Container>
       <Header>
         <TitleGroup>
           <h1>Room Management</h1>
-          <p>Manage all meeting rooms and their configurations</p>
+          <p>Manage all rooms and their configurations</p>
         </TitleGroup>
         <AddButton>
           <Plus size={16} />
@@ -193,9 +201,9 @@ const RoomManagement = () => {
                         ></div>
                         <div>
                           <div style={{ fontWeight: 500, color: '#111827' }}>{room.name}</div>
-                          {room.currentBooking && (
+                          {room.status=='booked' && (
                             <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                              Booked by {room.currentBooking.bookedBy}
+                              Booked by {findBookingId(room.id)}
                             </div>
                           )}
                         </div>
@@ -249,23 +257,21 @@ const RoomManagement = () => {
                           fontWeight: 500
                         }}
                       >
-                        {room.status === 'available' ? 'Available' : room.status === 'booked' ? 'Booked' : 'In Process'}
+                        {room.status === 'available' ? 'Available' : room.status === 'booked' ? 'Booked' : 'Unavailable'}
                       </span>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <button style={{ color: '#9ca3af' }} onClick={() => { setSelectedRoom(room); setShowRoomModal(true); }}>
+                        <button style={{ color: '#9ca3af' }} onClick={() => { setSelectedRoom(room); setShowRoomModal(true); setInitialTab('details')}}>
                           <Eye size={16} />
                         </button>
-                        <button style={{ color: '#10b981' }}>
+                        <button style={{ color: '#10b981' }} onClick={()=>{setSelectedRoom(room); setShowRoomModal(true); setInitialTab('settings')}}>
                           <Edit3 size={16} />
                         </button>
-                        <button style={{ color: '#ef4444' }}>
+                        <button style={{ color: '#ef4444' }} onClick={()=>{setSelectedRoom(room); setShowRoomModal(true); setInitialTab('settings')}} >
                           <Trash2 size={16} />
                         </button>
-                        <button style={{ color: '#6b7280' }}>
-                          <MoreVertical size={16} />
-                        </button>
+              
                       </div>
                     </td>
                   </motion.tr>
@@ -314,10 +320,11 @@ const RoomManagement = () => {
         </motion.div>
       )}
 
-      {showRoomModal && selectedRoom && (
+      {showRoomModal && selectedRoom &&  (
         <RoomDetailsModal
           room={selectedRoom}
-          onClose={() => { setShowRoomModal(false); setSelectedRoom(null); }}
+          initialTab={initialTab}
+          onClose={() => { setShowRoomModal(false); setSelectedRoom(null); setInitialTab('details') }}
         />
       )}
     </Container>
