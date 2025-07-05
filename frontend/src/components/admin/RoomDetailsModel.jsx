@@ -74,8 +74,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
     }));
   }, [bookings, room]);
 
-  // Helper: determine status from bookings
-  useEffect(() => {
+  const currentStatusRoom = () => {
     const now = new Date();
       let status = 'available';
     
@@ -99,6 +98,10 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
         .then(() => fetchRooms())
         .catch(() => {});
     }
+  }
+  // Helper: determine status from bookings
+  useEffect(() => {
+    currentStatusRoom();
   }, [allRoomBookings, room, fetchRooms]);
 
   // Split bookings into ongoing, upcoming and past 
@@ -406,6 +409,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       setDynamicFeatures([]);
       setSaveSuccess('Room settings updated successfully!');
       fetchRooms();
+      fetchBookings();
     } catch (error) {
       setSaveSuccess('Failed to update room settings.');
     }
@@ -425,6 +429,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       setRoomStatus('unavailable');
       setSaveSuccess('Room marked as unavailable!');
       fetchRooms();
+      fetchBookings();
     } catch (error) {
       setSaveSuccess('Failed to mark room as unavailable.');
     }
@@ -434,14 +439,14 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
   // Handler for Make Room Available button
   const handleSetAvailable = async () => {
     setUnavailableLoading(true);
-    setLocalStatus('available');
+    setLocalStatus('');
     setSaveSuccess('');
     try {
       await axios.patch(`http://localhost:8000/room/update/${room.id}`, {
         status: 'available',
         features: roomFeatures
       });
-      setRoomStatus('available');
+      setRoomStatus(computedStatus);
       setSaveSuccess('Room marked as available!');
       fetchRooms();
     } catch (error) {
