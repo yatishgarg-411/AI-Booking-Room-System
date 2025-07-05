@@ -72,7 +72,7 @@ const DashboardOverview = () => {
   const analytics = getAnalytics();
 
   const stats = [
-    { title: 'Total Rooms', value: analytics.totalRooms, icon: MapPin, color: 'blue', change: '+2 this month' },
+    { title: 'Total Rooms', value: analytics.totalRooms, icon: MapPin, color: 'blue'},
     { title: 'Available Now', value: analytics.availableRooms, icon: CheckCircle, color: 'green', change: 'Real-time' },
     { title: 'Booked Rooms', value: analytics.bookedRooms, icon: Calendar, color: 'orange', change: 'Currently active' },
     { title: 'Active Conflicts', value: analytics.activeConflicts, icon: AlertTriangle, color: 'red', change: 'Needs attention' }

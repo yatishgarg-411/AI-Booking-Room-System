@@ -31,7 +31,7 @@ function displayTime(timeStr) {
 
 const RoomDetailsModal = ({room,onClose,initialTab}) => {
   console.log(initialTab);
-  const { fetchRooms, fetchBookings, bookings } = useData();
+  const { fetchRooms, fetchBookings, bookings, setRoomStatus, getComputedRoomStatus } = useData();
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(initialTab);//Initially Room Details Tab Appears by default
@@ -61,7 +61,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
   const [saving, setSaving] = useState(false);
   const [unavailableLoading, setUnavailableLoading] = useState(false);// useState to show room is unavailable
   const [localStatus, setLocalStatus] = useState(room.status);
-  const [roomStatus, setRoomStatus] = useState(room.status);
+  const [roomStatus, setLocalRoomStatus] = useState(room.status);
 
   // Helper: get all bookings for this room
   useEffect(() => {
@@ -75,29 +75,10 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
   }, [bookings, room]);
 
   const currentStatusRoom = () => {
-    const now = new Date();
-      let status = 'available';
-    
-    // Check if there's an ongoing booking
-    for (const b of allRoomBookings) {
-      const start = parseBookingDate(b.bookingStartDate || b.date, b.startTime);
-      const end = parseBookingDate(b.bookingEndDate || b.date, b.endTime);
-      if (start && end && now >= start && now <= end && b.status !== 'cancelled') {
-        status = 'booked';
-        break;
-      }
-    }
-    
-    // Always update computed status based on bookings
+    // Use the centralized status computation
+    const status = getComputedRoomStatus(room.id);
     setComputedStatus(status);
     setStatusColor(getStatusColor(status));
-    
-    // Only update backend if room is not manually set to unavailable
-    if (room.status !== 'unavailable' && room.status !== status) {
-      axios.patch(`http://localhost:8000/room/update/${room.id}`, { status })
-        .then(() => fetchRooms())
-        .catch(() => {});
-    }
   }
   // Helper: determine status from bookings
   useEffect(() => {
@@ -422,11 +403,8 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
     setLocalStatus('unavailable');
     setSaveSuccess('');
     try {
-      await axios.patch(`http://localhost:8000/room/update/${room.id}`, {
-        status: 'unavailable',
-        features: roomFeatures
-      });
-      setRoomStatus('unavailable');
+      await setRoomStatus(room.id, 'unavailable');
+      setLocalRoomStatus('unavailable');
       setSaveSuccess('Room marked as unavailable!');
       fetchRooms();
       fetchBookings();
@@ -439,16 +417,14 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
   // Handler for Make Room Available button
   const handleSetAvailable = async () => {
     setUnavailableLoading(true);
-    setLocalStatus('');
+    setLocalStatus('available');
     setSaveSuccess('');
     try {
-      await axios.patch(`http://localhost:8000/room/update/${room.id}`, {
-        status: 'available',
-        features: roomFeatures
-      });
-      setRoomStatus(computedStatus);
+      await setRoomStatus(room.id, 'available');
+      setLocalRoomStatus(computedStatus);
       setSaveSuccess('Room marked as available!');
       fetchRooms();
+      fetchBookings();
     } catch (error) {
       setSaveSuccess('Failed to mark room as available.');
     }
@@ -457,7 +433,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
 
   // In useEffect, keep roomStatus in sync if room.status changes from parent
   useEffect(() => {
-    setRoomStatus(room.status);
+    setLocalRoomStatus(room.status);
   }, [room.status]);
 
   return (
@@ -876,7 +852,7 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
                           </label>
                           <select
                             value={roomStatus}
-                            onChange={e => setRoomStatus(e.target.value)}
+                            onChange={e => setLocalRoomStatus(e.target.value)}
                             style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 16, outline: 'none' }}
                           >
                             <option value="available">Available</option>

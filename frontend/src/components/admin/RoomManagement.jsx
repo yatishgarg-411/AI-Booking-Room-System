@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, Edit3, Trash2, Search, Users, MapPin, Eye, MoreVertical } from 'lucide-react';
+import { Plus, Edit3, Trash2, Search, Users, MapPin, Eye } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import styled from 'styled-components';
 import RoomDetailsModal from './RoomDetailsModel';
@@ -89,12 +89,27 @@ const Tbody = styled.tbody`
 
 const RoomManagement = () => {
 
-  const { rooms , bookings,  fetchRooms } = useData();
+  const { rooms , bookings,  fetchRooms, getComputedRoomStatus } = useData();
   const [searchTerm, setSearchTerm] = useState('');//Use State for search input string
   const [filterFloor, setFilterFloor] = useState('');//Used to store value of Floor filter selected
   const [selectedRoom, setSelectedRoom] = useState(null);//used to check which room is clicked to view info
   const [showRoomModal, setShowRoomModal] = useState(false);// To open Room Details Model Component
   const [initialTab,setInitialTab] = useState('details');//When Show Room Details Model Component Appears The initial Tab to display
+
+  // Helper function to parse booking date and time
+  const parseBookingDate = (dateStr, timeStr) => {
+    if (!dateStr || !timeStr) return null;
+    const time = timeStr.length === 5 ? timeStr : timeStr.slice(0,5);
+    const isoString = `${dateStr}T${time}`;
+    const d = new Date(isoString);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  // Helper function to get computed room status
+  const getRoomStatus = (room) => {
+    return getComputedRoomStatus(room.id);
+  };
+
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch = room.features.some(feature => 
       feature.toLowerCase().includes(searchTerm.toLowerCase())
@@ -112,8 +127,17 @@ const RoomManagement = () => {
 
 
   const findBookingId = (id) => {
-    const booking = bookings.find(b=>b.roomId === id);
-    return booking.bookedBy;
+    const now = new Date();
+    const ongoingBooking = bookings.find(b => {
+      if (b.roomId !== id && b.room_name !== id) return false;
+      if (b.status === 'cancelled') return false;
+      
+      const start = parseBookingDate(b.bookingStartDate || b.date, b.startTime);
+      const end = parseBookingDate(b.bookingEndDate || b.date, b.endTime);
+      return start && end && now >= start && now <= end;
+    });
+    
+    return ongoingBooking ? ongoingBooking.bookedBy : 'Unknown';
   };
 
   return (
@@ -194,16 +218,16 @@ const RoomManagement = () => {
                             height: '0.75rem',
                             borderRadius: '9999px',
                             backgroundColor:
-                              room.status === 'available'
+                              getRoomStatus(room) === 'available'
                                 ? '#22c55e'
-                                : room.status === 'booked'
+                                : getRoomStatus(room) === 'booked'
                                 ? '#ef4444'
                                 : '#f97316'
                           }}
                         ></div>
                         <div>
                           <div style={{ fontWeight: 500, color: '#111827' }}>{room.name}</div>
-                          {room.status=='booked' && (
+                          {getRoomStatus(room) === 'booked' && (
                             <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
                               Booked by {findBookingId(room.id)}
                             </div>
@@ -242,15 +266,15 @@ const RoomManagement = () => {
                       <span
                         style={{
                           backgroundColor:
-                            room.status === 'available'
+                            getRoomStatus(room) === 'available'
                               ? '#dcfce7'
-                              : room.status === 'booked'
+                              : getRoomStatus(room) === 'booked'
                               ? '#fee2e2'
                               : '#ffedd5',
                           color:
-                            room.status === 'available'
+                            getRoomStatus(room) === 'available'
                               ? '#166534'
-                              : room.status === 'booked'
+                              : getRoomStatus(room) === 'booked'
                               ? '#991b1b'
                               : '#c2410c',
                           padding: '0.25rem 0.5rem',
@@ -259,7 +283,7 @@ const RoomManagement = () => {
                           fontWeight: 500
                         }}
                       >
-                        {room.status === 'available' ? 'Available' : room.status === 'booked' ? 'Booked' : 'Unavailable'}
+                        {getRoomStatus(room) === 'available' ? 'Available' : getRoomStatus(room) === 'booked' ? 'Booked' : 'Unavailable'}
                       </span>
                     </td>
                     <td>
