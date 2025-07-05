@@ -96,7 +96,9 @@ const RoomManagement = () => {
   const [showRoomModal, setShowRoomModal] = useState(false);// To open Room Details Model Component
   const [initialTab,setInitialTab] = useState('details');//When Show Room Details Model Component Appears The initial Tab to display
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = room.features.some(feature => 
+      feature.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const matchesFloor = !filterFloor || room.floor.toString() === filterFloor;
     return matchesSearch && matchesFloor;
   });
@@ -136,7 +138,7 @@ const RoomManagement = () => {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search rooms..."
+                placeholder="Search by features..."
                 style={{ padding: '0.5rem 1rem 0.5rem 2.5rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', width: '16rem' }}
               />
             </div>
