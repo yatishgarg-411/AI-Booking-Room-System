@@ -31,7 +31,7 @@ function displayTime(timeStr) {
 
 const RoomDetailsModal = ({room,onClose,initialTab}) => {
   console.log(initialTab);
-  const { fetchRooms, fetchBookings, bookings, setRoomStatus, getComputedRoomStatus } = useData();
+  const { fetchRooms, fetchBookings, bookings, setRoomStatus, getComputedRoomStatus, addActivity } = useData();
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(initialTab);//Initially Room Details Tab Appears by default
@@ -192,12 +192,30 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       const currentTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
       const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   
-       await axios.patch(
+      await axios.patch(
         `http://localhost:8000/booking/update/${ongoing.bookingId}`,
         { 'endTime': currentTime, 'bookingEndDate': today }
       );
-        fetchRooms();
-        fetchBookings();
+
+      // Log activity
+      await addActivity({
+        type: 'booking',
+        action: 'released',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Released ${room.name} early`,
+        bookingDetails: {
+          originalEndDate: ongoing.bookingEndDate || ongoing.date,
+          originalEndTime: ongoing.endTime,
+          newEndDate: today,
+          newEndTime: currentTime
+        }
+      });
+
+      fetchRooms();
+      fetchBookings();
+      alert('Room released successfully!');
 
     }catch(error){
       alert(error);
@@ -209,6 +227,27 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
     try{
       const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
       alert(res.data.msg);
+      
+      // Find the booking details for activity logging
+      const cancelledBooking = bookings.find(b => b.bookingId === id || b.id === id);
+      
+      // Log activity
+      await addActivity({
+        type: 'booking',
+        action: 'cancelled',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Cancelled booking for ${room.name}`,
+        bookingDetails: cancelledBooking ? {
+          startDate: cancelledBooking.bookingStartDate || cancelledBooking.date,
+          endDate: cancelledBooking.bookingEndDate || cancelledBooking.date,
+          startTime: cancelledBooking.startTime,
+          endTime: cancelledBooking.endTime,
+          purpose: cancelledBooking.purpose
+        } : null
+      });
+      
       // Refresh data after cancellation
       fetchRooms();
       fetchBookings();
@@ -244,6 +283,23 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       setShowExtendModal(false);
       setExtendTime('');
       setExtendDate('');
+      
+      // Log activity
+      await addActivity({
+        type: 'booking',
+        action: 'extended',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Extended booking for ${room.name} until ${extendDate} ${extendTime}`,
+        bookingDetails: {
+          originalEndDate: ongoing.bookingEndDate || ongoing.date,
+          originalEndTime: ongoing.endTime,
+          newEndDate: extendDate,
+          newEndTime: extendTime
+        }
+      });
+      
       fetchRooms();
       fetchBookings();
       alert(`Booking extended until ${extendDate} ${extendTime}!`);
@@ -283,6 +339,24 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
         endTime: '',
         purpose: '',
       });
+      
+      // Log activity
+      await addActivity({
+        type: 'booking',
+        action: 'created',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Booked ${room.name} for ${bookingForm.purpose}`,
+        bookingDetails: {
+          startDate: bookingForm.bookingStartDate,
+          endDate: bookingForm.bookingEndDate,
+          startTime: bookingForm.startTime,
+          endTime: bookingForm.endTime,
+          purpose: bookingForm.purpose
+        }
+      });
+      
       // Refresh both rooms and bookings data
       fetchRooms();
       fetchBookings();
@@ -389,6 +463,23 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       room.features = [...roomFeatures];
       setDynamicFeatures([]);
       setSaveSuccess('Room settings updated successfully!');
+      
+      // Log activity
+      await addActivity({
+        type: 'room_settings',
+        action: 'updated',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Updated settings for ${room.name}`,
+        changes: {
+          previousFeatures: room.features,
+          newFeatures: roomFeatures,
+          previousStatus: room.status,
+          newStatus: localStatus
+        }
+      });
+      
       fetchRooms();
       fetchBookings();
     } catch (error) {
@@ -406,6 +497,21 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       await setRoomStatus(room.id, 'unavailable');
       setLocalRoomStatus('unavailable');
       setSaveSuccess('Room marked as unavailable!');
+      
+      // Log activity
+      await addActivity({
+        type: 'room_status_change',
+        action: 'marked_unavailable',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Marked ${room.name} as unavailable`,
+        changes: {
+          previousStatus: computedStatus,
+          newStatus: 'unavailable'
+        }
+      });
+      
       fetchRooms();
       fetchBookings();
     } catch (error) {
@@ -423,6 +529,21 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
       await setRoomStatus(room.id, 'available');
       setLocalRoomStatus(computedStatus);
       setSaveSuccess('Room marked as available!');
+      
+      // Log activity
+      await addActivity({
+        type: 'room_status_change',
+        action: 'marked_available',
+        roomName: room.name,
+        roomId: room.id,
+        user: user?.email || 'Admin',
+        details: `Marked ${room.name} as available`,
+        changes: {
+          previousStatus: 'unavailable',
+          newStatus: computedStatus
+        }
+      });
+      
       fetchRooms();
       fetchBookings();
     } catch (error) {

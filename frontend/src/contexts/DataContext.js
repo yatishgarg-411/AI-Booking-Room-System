@@ -113,6 +113,7 @@ export const DataProvider = ({ children }) => {
   useEffect(()=>{
     fetchRooms();
     fetchBookings();
+    fetchActivities();
   },[]);
 
   // Initialize analytics when data is first loaded
@@ -237,6 +238,59 @@ export const DataProvider = ({ children }) => {
     return computeRoomStatus(room, bookings);
   };
 
+  const [recentActivity, setRecentActivity] = useState([]);
+
+  // Function to add activity to recent activity list
+  const addActivity = async (activity) => {
+    const newActivity = {
+      timestamp: new Date(),
+      ...activity
+    };
+    
+    console.log('Adding activity:', newActivity);
+    
+    try {
+      // Send to backend
+      const response = await axios.post('http://localhost:8000/recentactivity/post', newActivity);
+      console.log('Activity saved to backend:', response.data);
+      
+      // Update local state
+      const savedActivity = response.data.activity;
+      setRecentActivity(prev => {
+        const updated = [savedActivity, ...prev];
+        // Keep only last 50 activities to prevent memory issues
+        return updated.slice(0, 50);
+      });
+    } catch (error) {
+      console.error('Failed to save activity to backend:', error);
+      // Fallback: add to local state only
+      const fallbackActivity = {
+        id: `activity-${Date.now()}`,
+        timestamp: new Date(),
+        ...activity
+      };
+      console.log('Adding activity to local state:', fallbackActivity);
+      setRecentActivity(prev => {
+        const updated = [fallbackActivity, ...prev];
+        return updated.slice(0, 50);
+      });
+    }
+  };
+
+  // Function to fetch activities from backend
+  const fetchActivities = async () => {
+    try {
+      console.log('Fetching activities from backend...');
+      const response = await axios.get('http://localhost:8000/recentactivity/all');
+      console.log('Activities fetched:', response.data);
+      setRecentActivity(response.data);
+    } catch (error) {
+      console.error('Failed to fetch activities:', error);
+      // Set empty array if backend is not available
+      setRecentActivity([]);
+    }
+  };
+
   return (
     <DataContext.Provider
       value={{
@@ -244,8 +298,10 @@ export const DataProvider = ({ children }) => {
         bookings,
         conflicts,
         analytics,
+        recentActivity,
         fetchRooms,
         fetchBookings,
+        fetchActivities,
         updateRoomStatus,
         setRoomStatus,
         getComputedRoomStatus,
@@ -255,6 +311,7 @@ export const DataProvider = ({ children }) => {
         cancelBooking,
         resolveConflict,
         getAnalytics,
+        addActivity,
       }}
     >
       {children}

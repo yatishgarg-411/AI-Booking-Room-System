@@ -1,8 +1,8 @@
 from fastapi import APIRouter, HTTPException
 from typing import List
 from bson import ObjectId
-from config.database import rooms_collection,rooms_bookings
-from models.room import Room,UpdateRoom,RoomBooking
+from config.database import rooms_collection,rooms_bookings,history_notifications
+from models.room import Room,UpdateRoom,RoomBooking,History
 from datetime import date, time, datetime
 
 router = APIRouter()
@@ -140,3 +140,53 @@ async def delete_booking(id:str):
         return {'msg': 'Booking Cancelled Successfully'}
     else:
         return {'msg': 'Booking Cancelling Failed'}
+
+
+
+@router.get('/recentactivity/all', response_model=List[History])
+async def getHistory():
+    """Get all recent activities"""
+    try:
+        notifications = []
+        cursor = history_notifications.find({}).sort("timestamp", -1).limit(50)  # Get latest 50 activities
+        
+        async for notification in cursor:
+            notification['id'] = str(notification['_id'])
+            notifications.append(notification)
+        
+        return notifications
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch activities: {str(e)}")
+
+@router.post('/recentactivity/post')
+async def addHistory(notify: History):
+    """Add a new activity to the history"""
+    try:
+        # Add timestamp if not provided
+        if not hasattr(notify, 'timestamp') or not notify.timestamp:
+            notify.timestamp = datetime.now()
+        
+        # Convert to dict and insert
+        activity_data = notify.dict()
+        result = await history_notifications.insert_one(activity_data)
+        
+        # Return the created activity with ID
+        activity_data['id'] = str(result.inserted_id)
+        return {
+            "msg": "Activity logged successfully",
+            "activity": activity_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to log activity: {str(e)}")
+
+@router.delete('/recentactivity/clear')
+async def clearHistory():
+    """Clear all activity history (admin function)"""
+    try:
+        result = await history_notifications.delete_many({})
+        return {
+            "msg": f"Cleared {result.deleted_count} activities",
+            "deleted_count": result.deleted_count
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to clear activities: {str(e)}")

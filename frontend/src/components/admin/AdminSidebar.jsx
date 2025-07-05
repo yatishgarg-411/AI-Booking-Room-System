@@ -126,7 +126,6 @@ const AdminSidebar = () => {
   const menuItems = [
     { name: 'Overview', icon: BarChart3, path: '/dashboard/overview', description: 'Dashboard and live stats' },
     { name: 'Room Management', icon: Map, path: '/dashboard/rooms', description: 'Manage all rooms' },
-    { name: 'Conflict Resolver', icon: AlertTriangle, path: '/dashboard/conflicts', description: 'Resolve booking conflicts' },
     { name: 'Usage Analytics', icon: BarChart3, path: '/dashboard/analytics', description: 'Usage reports and insights' },
     { name: 'AI Predictions', icon: TrendingUp, path: '/dashboard/predictions', description: 'Predictive insights' },
     { name: 'AI Assistant', icon: MessageSquare, path: '/dashboard/chat', description: 'Admin chat interface' },

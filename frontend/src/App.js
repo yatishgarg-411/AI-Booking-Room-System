@@ -1,7 +1,6 @@
 import './App.css';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import ConflictResolver from './components/admin/ConflictResolver';
 import PredictionInsights from './components/admin/PredictionInsights';
 import UsageAnalytics from './components/admin/UsageAnalytics';
 import { AuthProvider } from './contexts/AuthContext';
@@ -9,7 +8,6 @@ import { DataProvider } from './contexts/DataContext';
 import AdminDashboard from './pages/AdminDashboard';
 import DashboardOverview from './components/admin/DashboardOverview';
 import RoomManagement from './components/admin/RoomManagement';
-import Header from './components/shared/Header';
 import ProfilePage from './components/shared/ProfilePage';
 import RoomDetailsModal from './components/admin/RoomDetailsModel';
 
@@ -29,7 +27,6 @@ function App() {
                 <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<DashboardOverview />} />
                 <Route path="rooms" element={<RoomManagement />} />
-                <Route path="conflicts" element={<ConflictResolver />} />
                 <Route path="analytics" element={<UsageAnalytics />} />
                 <Route path="predictions" element={<PredictionInsights />} />
                 <Route path="profile" element={<ProfilePage />}/>

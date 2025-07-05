@@ -68,22 +68,56 @@ const RoomCard = styled(motion.div)`
 `;
 
 const DashboardOverview = () => {
-  const { rooms, bookings, conflicts, getAnalytics } = useData();
+  const { rooms, bookings, conflicts, getAnalytics, recentActivity, fetchActivities } = useData();
   const analytics = getAnalytics();
 
   const stats = [
     { title: 'Total Rooms', value: analytics.totalRooms, icon: MapPin, color: 'blue'},
     { title: 'Available Now', value: analytics.availableRooms, icon: CheckCircle, color: 'green', change: 'Real-time' },
-    { title: 'Booked Rooms', value: analytics.bookedRooms, icon: Calendar, color: 'orange', change: 'Currently active' },
-    { title: 'Active Conflicts', value: analytics.activeConflicts, icon: AlertTriangle, color: 'red', change: 'Needs attention' }
+    { title: 'Booked Rooms', value: analytics.bookedRooms, icon: Calendar, color: 'orange', change: 'Currently active' }
   ];
 
-  const recentActivity = [
-    { id: 1, action: 'Room 3 booked by John Doe', time: '2 minutes ago', type: 'booking' },
-    { id: 2, action: 'Conflict resolved in Room 2', time: '5 minutes ago', type: 'resolution' },
-    { id: 3, action: 'Room 5 released early', time: '10 minutes ago', type: 'release' },
-    { id: 4, action: 'New booking request for Room 1', time: '15 minutes ago', type: 'request' }
-  ];
+  // Helper function to format timestamp
+  const formatTimestamp = (timestamp) => {
+    if (!timestamp) return 'Unknown time';
+    
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60));
+    
+    if (diffInMinutes < 1) return 'Just now';
+    if (diffInMinutes < 60) return `${diffInMinutes} minute${diffInMinutes > 1 ? 's' : ''} ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
+  };
+
+  // Helper function to get activity icon
+  const getActivityIcon = (type, action) => {
+    switch (type) {
+      case 'booking':
+        switch (action) {
+          case 'created': return '📅';
+          case 'cancelled': return '❌';
+          case 'extended': return '⏰';
+          case 'released': return '🔓';
+          default: return '📋';
+        }
+      case 'room_status_change':
+        switch (action) {
+          case 'marked_available': return '✅';
+          case 'marked_unavailable': return '🚫';
+          default: return '⚙️';
+        }
+      case 'room_settings':
+        return '🔧';
+      default:
+        return '📝';
+    }
+  };
 
   const getColor = (type) => {
     switch (type) {
@@ -175,42 +209,55 @@ const DashboardOverview = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           <Section>
             <SectionHeader>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Recent Activity</h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Recent Activity</h2>
+                <button 
+                  onClick={fetchActivities}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '12px'
+                  }}
+                >
+                  Refresh
+                </button>
+              </div>
             </SectionHeader>
             <SectionBody>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {recentActivity.map((activity) => (
-                  <div key={activity.id} style={{ display: 'flex', gap: '12px' }}>
-                    <Dot style={{ backgroundColor: activity.type === 'booking' ? '#3b82f6' : activity.type === 'resolution' ? '#16a34a' : activity.type === 'release' ? '#f97316' : '#8b5cf6', marginTop: '4px' }} />
-                    <div>
-                      <p style={{ fontSize: '14px', color: '#111827' }}>{activity.action}</p>
-                      <p style={{ fontSize: '12px', color: '#6b7280' }}>{activity.time}</p>
+                <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280' }}>
+                  Total activities: {recentActivity.length}
+                </div>
+                {recentActivity.length > 0 ? (
+                  recentActivity.slice(0, 10).map((activity) => (
+                    <div key={activity.id} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                      <div style={{ fontSize: '16px', marginTop: '2px' }}>
+                        {getActivityIcon(activity.type, activity.action)}
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: '14px', color: '#111827', marginBottom: '4px' }}>
+                          {activity.details}
+                        </p>
+                        <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                          {formatTimestamp(activity.timestamp)} • {activity.user}
+                        </p>
+                      </div>
                     </div>
+                  ))
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
+                    <p>No recent activity</p>
                   </div>
-                ))}
+                )}
               </div>
             </SectionBody>
           </Section>
 
-          <Section>
-            <SectionHeader>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Quick Actions</h2>
-            </SectionHeader>
-            <SectionBody style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button style={{ textAlign: 'left', padding: '12px 16px', backgroundColor: '#eff6ff', borderRadius: '8px' }}>
-                <div style={{ fontWeight: '500', color: '#1e40af' }}>Add New Room</div>
-                <div style={{ fontSize: '14px', color: '#2563eb' }}>Create a new meeting room</div>
-              </button>
-              <button style={{ textAlign: 'left', padding: '12px 16px', backgroundColor: '#fff7ed', borderRadius: '8px' }}>
-                <div style={{ fontWeight: '500', color: '#9a3412' }}>Resolve Conflicts</div>
-                <div style={{ fontSize: '14px', color: '#f97316' }}>Handle booking conflicts</div>
-              </button>
-              <button style={{ textAlign: 'left', padding: '12px 16px', backgroundColor: '#f0fdf4', borderRadius: '8px' }}>
-                <div style={{ fontWeight: '500', color: '#14532d' }}>Generate Report</div>
-                <div style={{ fontSize: '14px', color: '#22c55e' }}>Export usage analytics</div>
-              </button>
-            </SectionBody>
-          </Section>
+          
         </div>
       </div>
     </Container>

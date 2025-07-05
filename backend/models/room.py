@@ -66,3 +66,14 @@ class RoomBooking(BaseModel):
     endTime: time
     purpose:str
 
+class History(BaseModel):
+    id: Optional[str] = None
+    timestamp: Optional[datetime] = None
+    type: str  # 'booking', 'room_status_change', 'room_settings'
+    action: str  # 'created', 'cancelled', 'extended', 'released', 'marked_available', 'marked_unavailable', 'updated'
+    roomName: str
+    roomId: str
+    user: str
+    details: str
+    bookingDetails: Optional[dict] = None  # For booking-related activities
+    changes: Optional[dict] = None  # For settings changes
