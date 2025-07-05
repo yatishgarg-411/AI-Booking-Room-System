@@ -36,7 +36,7 @@ export const DataProvider = ({ children }) => {
   useEffect(()=>{
     fetchRooms();
     fetchBookings();
-  },[bookings]);
+  },[]);
 
   const [conflicts, setConflicts] = useState([
     {
@@ -108,6 +108,8 @@ export const DataProvider = ({ children }) => {
         rooms,
         bookings,
         conflicts,
+        fetchRooms,
+        fetchBookings,
         updateRoomStatus,
         addBooking,
         cancelBooking,

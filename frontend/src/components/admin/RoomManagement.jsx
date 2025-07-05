@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { use, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Edit3, Trash2, Search, Users, MapPin, Eye, MoreVertical } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
@@ -88,12 +88,13 @@ const Tbody = styled.tbody`
 `;
 
 const RoomManagement = () => {
-  const { rooms } = useData();
+
+  const { rooms , fetchRooms } = useData();
   const [searchTerm, setSearchTerm] = useState('');
   const [filterFloor, setFilterFloor] = useState('');
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [showRoomModal, setShowRoomModal] = useState(false);
-
+  
   const filteredRooms = rooms.filter((room) => {
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFloor = !filterFloor || room.floor.toString() === filterFloor;
@@ -102,6 +103,9 @@ const RoomManagement = () => {
 
   const floors = Array.from(new Set(rooms.map((room) => room.floor))).sort();
 
+  useEffect(()=>{
+    fetchRooms();
+  },[]);
   return (
     <Container>
       <Header>

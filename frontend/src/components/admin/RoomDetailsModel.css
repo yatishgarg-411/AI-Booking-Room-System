@@ -1,0 +1,708 @@
+/* RoomDetailsModel.css */
+
+/* Overlay */
+.room-modal__overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+/* Modal Container */
+.room-modal {
+  background: #fff;
+  border-radius: 24px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+  max-width: 1120px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.room-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px;
+  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(to right, #eff6ff, #ede9fe);
+}
+.room-modal__header-content {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.room-modal__status-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  margin-right: 8px;
+  /* Dynamic color from style prop */
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(34,197,94,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+.room-modal__title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111827;
+}
+.room-modal__subtitle {
+  color: #4b5563;
+}
+.room-modal__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-modal__close-btn {
+  padding: 8px;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.2s, background 0.2s;
+}
+
+/* Tabs */
+.room-modal__tab-nav {
+  display: flex;
+  gap: 32px;
+  padding-left: 24px;
+  padding-right: 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.room-modal__tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 4px;
+  border-bottom: 2px solid transparent;
+  font-weight: 500;
+  font-size: 14px;
+  color: #6b7280;
+  background: none;
+  cursor: pointer;
+  transition: color 0.2s, border 0.2s;
+}
+.room-modal__tab-btn--active {
+  border-bottom: 2px solid #3b82f6;
+  color: #2563eb;
+}
+
+/* Content */
+.room-modal__content {
+  overflow-y: auto;
+  max-height: calc(90vh - 160px);
+}
+
+/* Image Carousel */
+.room-modal__image-carousel {
+  position: relative;
+  height: 256px;
+  background: #f3f4f6;
+}
+.room-modal__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.room-modal__carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.8);
+  border-radius: 9999px;
+  padding: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.room-modal__carousel-btn:first-of-type {
+  left: 16px;
+}
+.room-modal__carousel-btn:last-of-type {
+  right: 16px;
+}
+.room-modal__carousel-indicators {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+}
+.room-modal__carousel-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.5);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.room-modal__carousel-indicator--active {
+  background: #fff;
+}
+
+/* Details Section */
+.room-modal__details {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.room-modal__info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+.room-modal__info-item {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 16px;
+}
+.room-modal__info-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.room-modal__info-label {
+  font-weight: 500;
+  color: #111827;
+}
+.room-modal__info-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2563eb;
+}
+.room-modal__status-indicator {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 500;
+  /* Dynamic color from style prop */
+}
+
+/* Book Button */
+.room-modal__book-button {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 16px;
+}
+.room-modal__book-button-title {
+  font-weight: 500;
+  color: #065f46;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-modal__book-button-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #22c55e;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__book-button--disabled {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  font-weight: 500;
+}
+.room-modal__book-button-message {
+  margin-top: 8px;
+}
+
+/* Features */
+.room-modal__features {
+  margin-top: 16px;
+}
+.room-modal__features-title {
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 12px;
+}
+.room-modal__features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.room-modal__feature-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  cursor: pointer;
+}
+.room-modal__feature-label {
+  font-weight: 500;
+  color: #374151;
+}
+
+/* Bookings Tab */
+.room-modal__bookings {
+  padding: 24px;
+}
+.room-modal__ongoing-booking {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.room-modal__ongoing-booking-title {
+  font-weight: 500;
+  color: #991b1b;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-modal__ongoing-booking-details {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+.room-modal__ongoing-booking-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.room-modal__release-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__extend-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #22c55e;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__upcoming-bookings {
+  margin-bottom: 16px;
+}
+.room-modal__upcoming-bookings-title {
+  font-weight: 500;
+  color: #2563eb;
+  margin-bottom: 8px;
+}
+.room-modal__upcoming-booking {
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px;
+  background: #eff6ff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.room-modal__upcoming-booking-details {
+  /* left column */
+}
+.room-modal__cancel-button {
+  padding: 6px 14px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+}
+.room-modal__past-bookings {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
+  background: #f9fafb;
+}
+.room-modal__past-bookings-title {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+.room-modal__past-bookings-message {
+  color: #6b7280;
+  font-size: 13px;
+}
+.room-modal__past-booking {
+  border-bottom: 1px solid #e5e7eb;
+  padding: 8px;
+}
+
+/* Settings Tab */
+.room-modal__settings {
+  padding: 24px;
+}
+.room-modal__settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.room-modal__settings-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 16px;
+}
+.room-modal__settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.room-modal__settings-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.room-modal__settings-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+.room-modal__settings-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+}
+.room-modal__settings-features {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.room-modal__settings-feature {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.room-modal__settings-feature-checkbox {
+  border-radius: 4px;
+  border: 1px solid #d1d5db;
+  accent-color: #2563eb;
+}
+.room-modal__settings-feature-label {
+  font-size: 14px;
+  color: #374151;
+}
+.room-modal__settings-form {
+  display: flex;
+  gap: 8px;
+}
+.room-modal__settings-add-button {
+  padding: 8px 12px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+}
+.room-modal__settings-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+}
+.room-modal__settings-danger-zone {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 24px;
+}
+.room-modal__settings-danger-zone-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #111827;
+  margin-bottom: 16px;
+}
+.room-modal__settings-danger-zone-content {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.room-modal__settings-danger-zone-message {
+  font-size: 14px;
+  color: #ef4444;
+}
+.room-modal__settings-danger-zone-button {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+.room-modal__settings-danger-zone-button[disabled] {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+.room-modal__settings-danger-zone-content .room-modal__settings-danger-zone-button {
+  background: #22c55e;
+  color: #fff;
+}
+.room-modal__settings-danger-zone-content .room-modal__settings-danger-zone-button:last-child {
+  background: #ef4444;
+}
+
+/* Footer */
+.room-modal__footer {
+  padding: 16px 24px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.room-modal__footer-updated {
+  font-size: 14px;
+  color: #6b7280;
+}
+.room-modal__footer-actions {
+  display: flex;
+  gap: 12px;
+}
+.room-modal__footer-close-button {
+  padding: 8px 16px;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__footer-save-button {
+  padding: 8px 16px;
+  background: #2563eb;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__footer-success-message {
+  color: green;
+  font-size: 13px;
+  margin-left: 16px;
+}
+
+/* Extend Booking Modal */
+.room-modal__extend-booking-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 60;
+}
+.room-modal__extend-booking-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  max-width: 480px;
+  width: 100%;
+}
+.room-modal__extend-booking-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 24px 24px 0 24px;
+}
+.room-modal__extend-booking-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+.room-modal__extend-booking-message {
+  color: #4b5563;
+  margin-bottom: 16px;
+  padding: 0 24px;
+}
+.room-modal__extend-booking-form {
+  margin-bottom: 24px;
+  padding: 0 24px;
+}
+.room-modal__extend-booking-item {
+  margin-bottom: 16px;
+}
+.room-modal__extend-booking-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+}
+.room-modal__extend-booking-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #22c55e;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+}
+.room-modal__extend-booking-error {
+  color: red;
+  margin-bottom: 12px;
+}
+.room-modal__extend-booking-actions {
+  display: flex;
+  gap: 12px;
+}
+.room-modal__extend-booking-cancel-button {
+  flex: 1;
+  padding: 8px 16px;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__extend-booking-extend-button {
+  flex: 1;
+  padding: 8px 16px;
+  background: #22c55e;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 1;
+}
+.room-modal__extend-booking-extend-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Book Room Modal */
+.room-modal__book-room-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 60;
+}
+.room-modal__book-room-content {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+  max-width: 480px;
+  width: 100%;
+}
+.room-modal__book-room-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding: 24px 24px 0 24px;
+}
+.room-modal__book-room-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111827;
+}
+.room-modal__book-room-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 24px;
+}
+.room-modal__book-room-item {
+  margin-bottom: 8px;
+}
+.room-modal__book-room-input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-top: 4px;
+}
+.room-modal__book-room-error {
+  color: red;
+  font-size: 13px;
+}
+.room-modal__book-room-success {
+  color: green;
+  font-size: 13px;
+}
+.room-modal__book-room-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 0 24px 24px 24px;
+}
+.room-modal__book-room-cancel-button {
+  flex: 1;
+  padding: 8px 16px;
+  color: #374151;
+  background: #f3f4f6;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+.room-modal__book-room-submit-button {
+  flex: 1;
+  padding: 8px 16px;
+  background: #22c55e;
+  color: #fff;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+} 

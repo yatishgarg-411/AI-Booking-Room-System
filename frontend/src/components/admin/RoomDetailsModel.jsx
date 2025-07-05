@@ -27,12 +27,6 @@ import {
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 
-// RoomDetailsModal component props are now documented in a comment
-// room: object, onClose: function, onEdit?: function, onDelete?: function
-
-// Dummy booking history item structure in a comment
-// id, date, bookedBy, startTime, endTime, status
-const bookRoom='';
 
 // Helper to safely parse date and time into a JS Date object
 function parseBookingDate(dateStr, timeStr) {
@@ -62,17 +56,16 @@ const RoomDetailsModal = ({
   onEdit,
   onDelete
 }) => {
-  const { fetchRooms, bookings } = useData();
+  const { fetchRooms, fetchBookings, bookings } = useData();
   const { user } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [activeTab, setActiveTab] = useState('details');
-  const [showExtendModal, setShowExtendModal] = useState(false);
-  const [showBookModal, setShowBookModal] = useState(false);
+  const [activeTab, setActiveTab] = useState('details');//Initially Room Details Appears by default
+  const [showExtendModal, setShowExtendModal] = useState(false);//TO Toggle extend booking form
+  const [bookingError,setBookingError]=useState('');
+  const [showBookModal, setShowBookModal] = useState(false);//TO TOGGLE BOOK ROOM FORM
   const [extendTime, setExtendTime] = useState('');
   const [extendDate, setExtendDate] = useState('');
   const [extendError, setExtendError] = useState('');
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [bookingHistory,setBookingHistory]=useState([]);
   const [allRoomBookings, setAllRoomBookings] = useState([]);
   const [computedStatus, setComputedStatus] = useState('available');
   const [statusColor, setStatusColor] = useState({ background: '#d1fae5', color: '#065f46', border: '1px solid #bbf7d0' });
@@ -84,14 +77,14 @@ const RoomDetailsModal = ({
     endTime: '',
     purpose: '',
   });
-  const [bookingError, setBookingError] = useState('');
+  
   const [bookingSuccess, setBookingSuccess] = useState('');
-  const [roomFeatures, setRoomFeatures] = useState(room.features || []);
-  const [newFeature, setNewFeature] = useState('');
-  const [dynamicFeatures, setDynamicFeatures] = useState([]); // session-only features
+  const [roomFeatures, setRoomFeatures] = useState(room.features || []);// form that will tell all room features on the spot
+  const [newFeature, setNewFeature] = useState('');//new feature that we enter
+  const [dynamicFeatures, setDynamicFeatures] = useState([]); // session-only features that we enter on the spot
   const [saveSuccess, setSaveSuccess] = useState('');
   const [saving, setSaving] = useState(false);
-  const [unavailableLoading, setUnavailableLoading] = useState(false);
+  const [unavailableLoading, setUnavailableLoading] = useState(false);// useState to show room is unavailable
   const [localStatus, setLocalStatus] = useState(room.status);
   const [roomStatus, setRoomStatus] = useState(room.status);
 
@@ -108,10 +101,10 @@ const RoomDetailsModal = ({
 
   // Helper: determine status from bookings
   useEffect(() => {
-    // If room is unavailable, do not auto-update status
-    if (room.status === 'unavailable') return;
     const now = new Date();
     let status = 'available';
+    
+    // Check if there's an ongoing booking
     for (const b of allRoomBookings) {
       const start = parseBookingDate(b.bookingStartDate || b.date, b.startTime);
       const end = parseBookingDate(b.bookingEndDate || b.date, b.endTime);
@@ -120,16 +113,20 @@ const RoomDetailsModal = ({
         break;
       }
     }
+    
+    // Always update computed status based on bookings
     setComputedStatus(status);
     setStatusColor(getStatusColor(status));
-    if (room.status !== status) {
+    
+    // Only update backend if room is not manually set to unavailable
+    if (room.status !== 'unavailable' && room.status !== status) {
       axios.patch(`http://localhost:8000/room/update/${room.id}`, { status })
-        .then(() => fetchRooms && fetchRooms())
+        .then(() => fetchRooms())
         .catch(() => {});
     }
   }, [allRoomBookings, room, fetchRooms]);
 
-  // Split bookings
+  // Split bookings into ongoing, upcoming and past 
   const now = new Date();
   let ongoing = null, upcoming = [], past = [];
   allRoomBookings.forEach(b => {
@@ -202,6 +199,8 @@ const RoomDetailsModal = ({
 
   const getStatusText = (status) => {
     switch (status) {
+      case 'unavailable':
+        return 'Unavailable';
       case 'available':
         return 'Available';
       case 'booked':
@@ -240,19 +239,27 @@ const RoomDetailsModal = ({
         { 'endTime': currentTime, 'bookingEndDate': today }
       );
         fetchRooms();
+        fetchBookings();
 
     }catch(error){
-        alert(error);
+      alert(error);
     }
   };
+
+
   const handleCancelBooking = async (id) =>{
     try{
       const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
       alert(res.data.msg);
+      // Refresh data after cancellation
+      fetchRooms();
+      fetchBookings();
     }catch(error){
       alert(error);
     }
   }
+
+
   const handleExtendBooking = async () => {
     setExtendError('');
     if (!extendDate || !extendTime) {
@@ -280,6 +287,7 @@ const RoomDetailsModal = ({
       setExtendTime('');
       setExtendDate('');
       fetchRooms();
+      fetchBookings();
       alert(`Booking extended until ${extendDate} ${extendTime}!`);
     } catch (error) {
       setExtendError('Failed to extend booking');
@@ -317,7 +325,9 @@ const RoomDetailsModal = ({
         endTime: '',
         purpose: '',
       });
-      fetchRooms && fetchRooms();
+      // Refresh both rooms and bookings data
+      fetchRooms();
+      fetchBookings();
     } catch (error) {
       let errMsg = error?.response?.data?.detail || error.message || 'Booking failed';
       if (Array.isArray(errMsg)) {
@@ -381,7 +391,7 @@ const RoomDetailsModal = ({
       gap: 32,
       paddingLeft: 24,
       paddingRight: 24,
-      borderBottom: '1px solid #e5e7eb'
+      
     },
     tabBtn: (active) => ({
       display: 'flex',
@@ -427,7 +437,7 @@ const RoomDetailsModal = ({
       room.features = [...roomFeatures];
       setDynamicFeatures([]);
       setSaveSuccess('Room settings updated successfully!');
-      fetchRooms && fetchRooms();
+      fetchRooms();
     } catch (error) {
       setSaveSuccess('Failed to update room settings.');
     }
@@ -446,7 +456,7 @@ const RoomDetailsModal = ({
       });
       setRoomStatus('unavailable');
       setSaveSuccess('Room marked as unavailable!');
-      fetchRooms && fetchRooms();
+      fetchRooms();
     } catch (error) {
       setSaveSuccess('Failed to mark room as unavailable.');
     }
@@ -465,7 +475,7 @@ const RoomDetailsModal = ({
       });
       setRoomStatus('available');
       setSaveSuccess('Room marked as available!');
-      fetchRooms && fetchRooms();
+      fetchRooms();
     } catch (error) {
       setSaveSuccess('Failed to mark room as available.');
     }
@@ -494,7 +504,9 @@ const RoomDetailsModal = ({
           style={styles.modal}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Header */}
+
+
+          {/* Header Of Container */ }
           <div style={styles.header}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ width: 16, height: 16, borderRadius: 9999, ...statusColor, animation: 'pulse 2s infinite' }}></div>
@@ -505,17 +517,17 @@ const RoomDetailsModal = ({
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <button
-                onClick={onEdit}
+                onClick={()=>setActiveTab('settings')}
                 style={{ ...styles.closeBtn, color: '#6b7280' }}
                 title="Edit Room"
               >
                 <Edit3 style={{ width: 20, height: 20 }} />
               </button>
-              <button
-                onClick={onDelete}
-                style={{ ...styles.closeBtn, color: '#ef4444' }}
-                title="Delete Room"
-              >
+                              <button
+                  onClick={() => setActiveTab('settings')}
+                  style={{ ...styles.closeBtn, color: '#ef4444' }}
+                  title="Delete Room"
+                >
                 <Trash2 style={{ width: 20, height: 20 }} />
               </button>
               <button
@@ -527,7 +539,10 @@ const RoomDetailsModal = ({
             </div>
           </div>
 
-          {/* Tabs */}
+
+
+
+          {/* 3 Tabs  */}
           <div style={{ borderBottom: '1px solid #e5e7eb' }}>
             <nav style={styles.tabNav}>
               {tabs.map(tab => {
@@ -546,8 +561,13 @@ const RoomDetailsModal = ({
             </nav>
           </div>
 
+
+
+
+
+
           <div style={{ overflowY: 'auto', maxHeight: 'calc(90vh - 160px)' }}>
-            {/* Details Tab */}
+            {/* Room Details Tab */}
             {activeTab === 'details' && (
               <div>
                 {/* Image Carousel */}
@@ -585,10 +605,15 @@ const RoomDetailsModal = ({
                     ))}
                   </div>
                 </div>
+
                 {/* Room Details */}
+
                 <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 24 }}>
                   {/* Basic Info Grid */}
+
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 24 }}>
+
+                    {/* {CAPACITY} */}
                     <div style={{ background: '#f9fafb', borderRadius: 12, padding: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                         <Users style={{ width: 20, height: 20, color: '#6b7280' }} />
@@ -596,6 +621,9 @@ const RoomDetailsModal = ({
                       </div>
                       <p style={{ fontSize: 24, fontWeight: 700, color: '#2563eb' }}>{room.capacity} people</p>
                     </div>
+
+
+                    {/* {LOCATION} */}
                     <div style={{ background: '#f9fafb', borderRadius: 12, padding: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                         <MapPin style={{ width: 20, height: 20, color: '#6b7280' }} />
@@ -603,6 +631,8 @@ const RoomDetailsModal = ({
                       </div>
                       <p style={{ fontSize: 24, fontWeight: 700, color: '#2563eb' }}>Floor {room.floor}</p>
                     </div>
+
+                    {/* {STATUS} */}
                     <div style={{ background: '#f9fafb', borderRadius: 12, padding: 16 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
                         <div style={{ width: 12, height: 12, borderRadius: 9999, ...statusColor }}></div>
@@ -612,9 +642,15 @@ const RoomDetailsModal = ({
                         {getStatusText(computedStatus)}
                       </div>
                     </div>
+
+
+
                   </div>
+
+
                   {/* Book Room Button (always show unless unavailable) */}
                   {roomStatus !== 'unavailable' ? (
+                    
                     <div style={{ background: '#ecfdf5', border: '1px solid #bbf7d0', borderRadius: 12, padding: 16 }}>
                       <h4 style={{ fontWeight: 500, color: '#065f46', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                         <CheckCircle style={{ width: 16, height: 16 }} />
@@ -640,6 +676,10 @@ const RoomDetailsModal = ({
                       <div style={{ marginTop: 8 }}>This room is currently unavailable for new bookings.</div>
                     </div>
                   )}
+
+
+
+
                   {/* Features */}
                   <div>
                     <h4 style={{ fontWeight: 500, color: '#111827', marginBottom: 12 }}>Room Features & Amenities</h4>
@@ -658,12 +698,23 @@ const RoomDetailsModal = ({
                       })}
                     </div>
                   </div>
+
+
+
+
                 </div>
               </div>
             )}
+
+
+
+
+
             {/* Bookings Tab */}
             {activeTab === 'bookings' && (
               <div style={{ padding: 24 }}>
+
+
                 {/* Ongoing Booking */}
                 {ongoing && (
                   <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 16, marginBottom: 16 }}>
@@ -678,7 +729,10 @@ const RoomDetailsModal = ({
                       <div><b>Time:</b> {displayTime(ongoing.startTime)} - {displayTime(ongoing.endTime)}</div>
                       <div><b>Purpose:</b> {ongoing.purpose}</div>
                     </div>
+
+
                     <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+
                       <button
                         onClick={handleReleaseRoom}
                         style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
@@ -686,8 +740,11 @@ const RoomDetailsModal = ({
                         <XCircle style={{ width: 16, height: 16 }} />
                         <span>Release</span>
                       </button>
+
+
+
                       <button
-                        onClick={() => setShowExtendModal(true)}
+                        onClick={() => setShowExtendModal(true)}//Here Now Extend Room form will pop-up
                         style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#22c55e', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
                       >
                         <RotateCcw style={{ width: 16, height: 16 }} />
@@ -696,6 +753,9 @@ const RoomDetailsModal = ({
                     </div>
                   </div>
                 )}
+
+
+
                 {/* Upcoming Bookings */}
                 {upcoming.length > 0 && (
                   <div style={{ marginBottom: 16 }}>
@@ -708,7 +768,6 @@ const RoomDetailsModal = ({
                           <div><b>End Date:</b> {displayDate(booking.bookingEndDate || booking.date)}</div>
                           <div><b>Time:</b> {displayTime(booking.startTime)} - {displayTime(booking.endTime)}</div>
                           <div><b>Purpose:</b> {booking.purpose}</div>
-                          <div><b>Id:</b> {booking.bookingId}</div>
                         </div>
                         <button
                           style={{ padding: '6px 14px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13 }} onClick={()=>handleCancelBooking(booking.bookingId)}
@@ -719,6 +778,8 @@ const RoomDetailsModal = ({
                     ))}
                   </div>
                 )}
+
+
                 {/* Past Bookings (scrollable) */}
                 <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, background: '#f9fafb' }}>
                   <h4 style={{ fontWeight: 500, color: '#374151', marginBottom: 8 }}>Past Bookings</h4>
@@ -735,6 +796,8 @@ const RoomDetailsModal = ({
                 </div>
               </div>
             )}
+
+
             {/* Settings Tab */}
             {activeTab === 'settings' && (
               <div style={{ padding: 24 }}>
@@ -839,8 +902,8 @@ const RoomDetailsModal = ({
                             Room Status
                           </label>
                           <select
-                            value={localStatus}
-                            onChange={e => setLocalStatus(e.target.value)}
+                            value={roomStatus}
+                            onChange={e => setRoomStatus(e.target.value)}
                             style={{ width: '100%', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: 8, fontSize: 16, outline: 'none' }}
                           >
                             <option value="available">Available</option>
@@ -853,6 +916,8 @@ const RoomDetailsModal = ({
                       </div>
                     </div>
                   </div>
+
+
                   <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 24 }}>
                     <h4 style={{ fontSize: 16, fontWeight: 500, color: '#111827', marginBottom: 16 }}>Danger Zone</h4>
                     <div style={{
@@ -869,6 +934,8 @@ const RoomDetailsModal = ({
                             <p style={{ fontSize: 14, color: '#ef4444' }}>Make this room temporarily unavailable at this moment</p>
                           )}
                         </div>
+
+
                         {roomStatus === 'unavailable' ? (
                           <button
                             onClick={handleSetAvailable}
@@ -918,6 +985,9 @@ const RoomDetailsModal = ({
             {saveSuccess && <div style={{ color: saveSuccess.includes('successfully') ? 'green' : 'red', fontSize: 13, marginLeft: 16 }}>{saveSuccess}</div>}
           </div>
         </motion.div>
+
+
+
         {/* Extend Booking Modal */}
         <AnimatePresence>
           {showExtendModal && ongoing && (
@@ -990,6 +1060,9 @@ const RoomDetailsModal = ({
             </motion.div>
           )}
         </AnimatePresence>
+
+
+
         {/* Book Room Modal */}
         <AnimatePresence>
           {showBookModal && (
