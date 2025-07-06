@@ -190,6 +190,8 @@ const LoginPage = () => {
         alert(res.data.msg);
         setToken(res.data.token);
         if(formData.role ==='admin'){navigate('/dashboard');}
+        else if(formData.role ==='user'){navigate('/user');}
+        setIsLogin(false)
       } catch (error) {
         if (error.response && error.response.status === 404) {
           alert("User doesnot exists!!");

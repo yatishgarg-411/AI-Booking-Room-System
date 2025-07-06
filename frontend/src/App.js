@@ -10,8 +10,8 @@ import DashboardOverview from './components/admin/DashboardOverview';
 import RoomManagement from './components/admin/RoomManagement';
 import ProfilePage from './components/shared/ProfilePage';
 import RoomDetailsModal from './components/admin/RoomDetailsModel';
-
-
+import { motion } from 'framer-motion';
+import UserDashboard from './pages/UserDashboard';
 
 function App() {
   return (
@@ -22,8 +22,8 @@ function App() {
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path='test' element={<RoomDetailsModal/>}></Route>
-              <Route path="/dashboard" element={<AdminDashboard />}>
 
+              <Route path="/dashboard" element={<AdminDashboard />}>
                 <Route index element={<Navigate to="overview" replace />} />
                 <Route path="overview" element={<DashboardOverview />} />
                 <Route path="rooms" element={<RoomManagement />} />
@@ -31,6 +31,8 @@ function App() {
                 <Route path="predictions" element={<PredictionInsights />} />
                 <Route path="profile" element={<ProfilePage />}/>
               </Route>
+
+              <Route path="/user/*" element={<UserDashboard />} />
             </Routes>
 
 
