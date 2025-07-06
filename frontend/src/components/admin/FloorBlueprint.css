@@ -1,0 +1,187 @@
+/* Floor Blueprint Animations */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes roomGlow {
+  0%, 100% {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Room hover effects */
+.room-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.room-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.15);
+}
+
+.room-card.available:hover {
+  box-shadow: 0 12px 40px -10px rgba(34, 197, 94, 0.2);
+}
+
+.room-card.booked:hover {
+  box-shadow: 0 12px 40px -10px rgba(239, 68, 68, 0.2);
+}
+
+.room-card.unavailable:hover {
+  box-shadow: 0 12px 40px -10px rgba(245, 158, 11, 0.2);
+}
+
+/* Floor header gradient animation */
+.floor-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Passage animation */
+.passage {
+  background: linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 50%, #f3f4f6 100%);
+  background-size: 200% 100%;
+  animation: passageFlow 4s ease-in-out infinite;
+}
+
+@keyframes passageFlow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Elevator indicator pulse */
+.elevator-indicator {
+  animation: elevatorPulse 2s ease-in-out infinite;
+}
+
+@keyframes elevatorPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Status indicator animations */
+.status-indicator.available {
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.booked {
+  animation: bookedPulse 1.5s infinite;
+}
+
+@keyframes bookedPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2);
+  }
+}
+
+/* Floor entrance animation */
+.floor-entrance {
+  position: relative;
+  overflow: hidden;
+}
+
+.floor-entrance::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: entranceShine 3s ease-in-out infinite;
+}
+
+@keyframes entranceShine {
+  0% {
+    left: -100%;
+  }
+  50% {
+    left: 100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .floor-layout {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .passage {
+    display: none !important;
+  }
+  
+  .room-card {
+    margin-bottom: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .floor-header h2 {
+    font-size: 16px !important;
+  }
+  
+  .room-card h3 {
+    font-size: 14px !important;
+  }
+} 

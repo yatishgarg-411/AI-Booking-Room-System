@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import styled from 'styled-components';
 import { Users, MapPin, Calendar, TrendingUp, AlertTriangle, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
+import FloorBlueprint from './FloorBlueprint';
 
 const Container = styled.div`
   padding: 24px;
@@ -68,7 +69,7 @@ const RoomCard = styled(motion.div)`
 `;
 
 const DashboardOverview = () => {
-  const { rooms, bookings, conflicts, getAnalytics, recentActivity, fetchActivities } = useData();
+  const {  getAnalytics, recentActivity, fetchActivities } = useData();
   const analytics = getAnalytics();
 
   const stats = [
@@ -166,99 +167,60 @@ const DashboardOverview = () => {
         })}
       </StatsGrid>
 
-      {/* Room Status and Activity */}
-      <div style={{ display: 'grid', gap: '32px', gridTemplateColumns: '2fr 1fr' }}>
+      {/* Floor Blueprint View */}
+      <FloorBlueprint />
+
+      {/* Recent Activity Section */}
+      <div style={{ marginTop: '32px' }}>
         <Section>
           <SectionHeader>
-            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Live Room Status</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Recent Activity</h2>
+              <button 
+                onClick={fetchActivities}
+                style={{
+                  padding: '8px 16px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px'
+                }}
+              >
+                Refresh
+              </button>
+            </div>
           </SectionHeader>
           <SectionBody>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
-              {rooms.map((room) => (
-                <RoomCard
-                  key={room.id}
-                  whileHover={{ scale: 1.02 }}
-                  style={{
-                    borderColor: room.status === 'available' ? '#bbf7d0' : room.status === 'booked' ? '#fecaca' : '#fed7aa',
-                    backgroundColor: room.status === 'available' ? '#f0fdf4' : room.status === 'booked' ? '#fef2f2' : '#fff7ed'
-                  }}
-                >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <h3 style={{ fontWeight: '500', color: '#111827' }}>{room.name}</h3>
-                    <Dot style={{ backgroundColor: getDotColor(room.status) }} />
-                  </div>
-                  <div style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.5' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Users size={12} /><span>Capacity: {room.capacity}</span></div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={12} /><span>Floor {room.floor}</span></div>
-                    {room.currentBooking && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Clock size={12} /><span>{room.currentBooking.startTime} - {room.currentBooking.endTime}</span></div>
-                    )}
-                  </div>
-                  {room.status !== 'available' && (
-                    <div style={{ marginTop: '12px', display: 'flex', gap: '8px' }}>
-                      <button style={{ fontSize: '12px', padding: '4px 8px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px' }}>Release</button>
-                      <button style={{ fontSize: '12px', padding: '4px 8px', backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '6px' }}>Extend</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280' }}>
+                Total activities: {recentActivity.length}
+              </div>
+              {recentActivity.length > 0 ? (
+                recentActivity.slice(0, 10).map((activity) => (
+                  <div key={activity.id} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                    <div style={{ fontSize: '16px', marginTop: '2px' }}>
+                      {getActivityIcon(activity.type, activity.action)}
                     </div>
-                  )}
-                </RoomCard>
-              ))}
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '14px', color: '#111827', marginBottom: '4px' }}>
+                        {activity.details}
+                      </p>
+                      <p style={{ fontSize: '12px', color: '#6b7280' }}>
+                        {formatTimestamp(activity.timestamp)} • {activity.user}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
+                  <p>No recent activity</p>
+                </div>
+              )}
             </div>
           </SectionBody>
         </Section>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <Section>
-            <SectionHeader>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#111827' }}>Recent Activity</h2>
-                <button 
-                  onClick={fetchActivities}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#3b82f6',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '12px'
-                  }}
-                >
-                  Refresh
-                </button>
-              </div>
-            </SectionHeader>
-            <SectionBody>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ marginBottom: '12px', fontSize: '12px', color: '#6b7280' }}>
-                  Total activities: {recentActivity.length}
-                </div>
-                {recentActivity.length > 0 ? (
-                  recentActivity.slice(0, 10).map((activity) => (
-                    <div key={activity.id} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                      <div style={{ fontSize: '16px', marginTop: '2px' }}>
-                        {getActivityIcon(activity.type, activity.action)}
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: '14px', color: '#111827', marginBottom: '4px' }}>
-                          {activity.details}
-                        </p>
-                        <p style={{ fontSize: '12px', color: '#6b7280' }}>
-                          {formatTimestamp(activity.timestamp)} • {activity.user}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div style={{ textAlign: 'center', padding: '20px', color: '#6b7280' }}>
-                    <p>No recent activity</p>
-                  </div>
-                )}
-              </div>
-            </SectionBody>
-          </Section>
-
-          
-        </div>
       </div>
     </Container>
   );
