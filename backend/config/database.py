@@ -6,6 +6,9 @@ load_dotenv()
 
 MONGOURI=os.getenv('MONGOURI')
 
+if not MONGOURI:
+    raise Exception("MONGOURI not found. Check your .env file or load_dotenv()")
+
 client=AsyncIOMotorClient(MONGOURI)
 db=client['Hotel']
 user_collection=db['users']

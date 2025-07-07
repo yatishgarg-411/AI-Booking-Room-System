@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar, Search, Users, MapPin, Filter, Star, Wifi, Monitor, Coffee } from 'lucide-react';
 import styled, { keyframes } from 'styled-components';
+import { FaFilter, FaUsers, FaLayerGroup, FaThList } from 'react-icons/fa';
 
 // Animations
 const hoverFloat = keyframes`
@@ -94,58 +95,82 @@ const SidebarTitle = styled.h2`
   margin-left: 0.75rem;
 `;
 
-const FilterGroup = styled.div`
-  margin-bottom: 1.5rem;
-`;
-
-const FilterLabel = styled.label`
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374751;
-  margin-bottom: 0.75rem;
-`;
-
-const InputContainer = styled.div`
+const FilterSidebar = styled.div`
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 6px 32px rgba(79,70,229,0.10);
+  padding: 2.2rem 2rem 2rem 2rem;
+  margin-bottom: 2rem;
+  min-width: 320px;
+  max-width: 350px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
   position: relative;
 `;
 
-const StyledInput = styled.input`
-  width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-  transition: all 0.2s;
-  
-  &:focus {
-    outline: none;
-    ring: 2px solid #3b82f6;
-    border-color: transparent;
-  }
+const FilterHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #4f46e5;
+  margin-bottom: 0.5rem;
 `;
 
-const StyledSelect = styled.select`
-  width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-  background: white;
-  appearance: none;
-  transition: all 0.2s;
-  
-  &:focus {
-    outline: none;
-    ring: 2px solid #3b82f6;
-    border-color: transparent;
-  }
+const FilterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1.2rem;
 `;
 
-const IconWrapper = styled.div`
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #9ca3af;
+const FilterLabel = styled.label`
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 0.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+`;
+
+const FilterInput = styled.input`
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.7rem;
+  border: 1.5px solid #d1d5db;
+  font-size: 1rem;
+  background: #f3f4f6;
+`;
+
+const FilterSelectStyled = styled.select`
+  padding: 0.5rem 0.8rem;
+  border-radius: 0.7rem;
+  border: 1.5px solid #d1d5db;
+  font-size: 1rem;
+  background: #f3f4f6;
+  min-width: 120px;
+  margin-top: 0.5rem;
+`;
+
+const FeatureTag = styled.label`
+  background: ${props => props.selected ? '#6366f1' : '#f3f4f6'};
+  color: ${props => props.selected ? '#fff' : '#4f46e5'};
+  border-radius: 0.7rem;
+  padding: 0.4rem 1.1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 0.2rem 0.5rem 0.2rem 0;
+  border: 2px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: background 0.2s, color 0.2s, border 0.2s;
+  &:hover {
+    background: #4f46e5;
+    color: #fff;
+    border: 2px solid #6366f1;
+  }
 `;
 
 const FilterStats = styled.div`
@@ -230,18 +255,18 @@ const RoomCardContainer = styled.div`
   }
 `;
 
-const RoomImageContainer = styled.div`
-  height: 12rem;
-  background: linear-gradient(135deg, #60a5fa, #a855f7, #ec4899);
+const RoomImageWrapper = styled.div`
   position: relative;
-  overflow: hidden;
+`;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.2);
-  }
+const RoomImage = styled.img`
+  width: 100%;
+  max-width: 260px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 1rem 1rem 0 0;
+  margin-bottom: 1rem;
+  background: #e0e7ff;
 `;
 
 const StatusBadge = styled.span`
@@ -379,22 +404,25 @@ const EmptyText = styled.p`
 
 const ModalOverlay = styled.div`
   position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 1100;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  z-index: 50;
 `;
 
 const ModalContent = styled.div`
-  background: white;
+  background: #fff;
   border-radius: 1rem;
-  max-width: 28rem;
-  width: 100%;
-  padding: 1.5rem;
-  animation: ${scaleIn} 0.3s ease-out;
+  padding: 2rem;
+  min-width: 350px;
+  max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
 `;
 
 const ModalTitle = styled.h2`
@@ -440,6 +468,41 @@ const ModalButton = styled.button`
   `}
 `;
 
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const Label = styled.label`
+  font-weight: 500;
+  color: #1e293b;
+  margin-bottom: 0.3rem;
+`;
+
+const Input = styled.input`
+  padding: 0.6rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+`;
+
+const Button = styled.button`
+  background: #4f46e5;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.7rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  &:hover { background: #3730a3; }
+`;
+
+const dummyUser = { name: 'John Doe', email: 'john@example.com' };
+
 const RoomCard = ({ room, onBook }) => {
   const [isHovered, setIsHovered] = useState(false);
   
@@ -460,15 +523,14 @@ const RoomCard = ({ room, onBook }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <RoomImageContainer>
-        <StatusBadge status={room.status}>
-          {room.status}
-        </StatusBadge>
+      <RoomImageWrapper>
+        <RoomImage src={room.image || '/room-placeholder.jpg'} alt={room.name} />
+        <StatusBadge status={room.status}>{room.status}</StatusBadge>
         <FloorInfo>
           <MapPin size={16} />
           <FloorText>Floor {room.floor}</FloorText>
         </FloorInfo>
-      </RoomImageContainer>
+      </RoomImageWrapper>
       
       <RoomContent>
         <RoomHeader>
@@ -491,7 +553,7 @@ const RoomCard = ({ room, onBook }) => {
         </FeaturesContainer>
         
         <BookButton
-          onClick={onBook}
+          onClick={() => { onBook(room); }}
           disabled={room.status === 'booked'}
           available={room.status === 'available'}
         >
@@ -502,20 +564,72 @@ const RoomCard = ({ room, onBook }) => {
   );
 };
 
-const BookingModal = ({ room, onClose, onBook }) => {
+const BookingModal = ({ room, onClose, user }) => {
+  const [form, setForm] = useState({
+    name: user.name,
+    email: user.email,
+    roomName: room.name,
+    floor: room.floor,
+    features: room.features.join(', '),
+    startDate: '',
+    endDate: '',
+    startTime: '',
+    endTime: '',
+    purpose: '',
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
   return (
-    <ModalOverlay>
-      <ModalContent>
-        <ModalTitle>Book {room.name}</ModalTitle>
-        <ModalText>Confirm your booking for this room</ModalText>
-        <ModalActions>
-          <ModalButton onClick={onClose}>
-            Cancel
-          </ModalButton>
-          <ModalButton primary onClick={onBook}>
-            Confirm
-          </ModalButton>
-        </ModalActions>
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={e => e.stopPropagation()}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1e293b' }}>
+          Book Room
+        </h2>
+        {submitted ? (
+          <div style={{ color: '#22c55e', fontWeight: 'bold', fontSize: '1.1rem' }}>
+            Room booked successfully!
+            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        ) : (
+          <Form onSubmit={handleSubmit}>
+            <Label>Name</Label>
+            <Input name="name" value={form.name} readOnly />
+            <Label>Email</Label>
+            <Input name="email" value={form.email} readOnly />
+            <Label>Room</Label>
+            <Input name="roomName" value={form.roomName} readOnly />
+            <Label>Floor</Label>
+            <Input name="floor" value={form.floor} readOnly />
+            <Label>Features</Label>
+            <Input name="features" value={form.features} readOnly />
+            <Label>Booking Start Date</Label>
+            <Input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
+            <Label>Booking End Date</Label>
+            <Input name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
+            <Label>Booking Start Time</Label>
+            <Input name="startTime" type="time" value={form.startTime} onChange={handleChange} required />
+            <Label>Booking End Time</Label>
+            <Input name="endTime" type="time" value={form.endTime} onChange={handleChange} required />
+            <Label>Purpose</Label>
+            <Input name="purpose" value={form.purpose} onChange={handleChange} required />
+            <Button type="submit">Book Room</Button>
+            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} type="button" onClick={onClose}>
+              Close
+            </Button>
+          </Form>
+        )}
       </ModalContent>
     </ModalOverlay>
   );
@@ -523,65 +637,84 @@ const BookingModal = ({ room, onClose, onBook }) => {
 
 const dummyRooms = [
   {
-    id: '1',
+    id: 1,
     name: 'Ocean View Conference Room',
-    capacity: 12,
     floor: 3,
+    capacity: 12,
+    status: 'available',
     features: ['Projector', 'Whiteboard', 'WiFi'],
-    status: 'available',
+    image: 'https://images.pexels.com/photos/260689/pexels-photo-260689.jpeg?auto=compress&w=600',
   },
   {
-    id: '2',
+    id: 2,
     name: 'Skyline Boardroom',
+    floor: 2,
     capacity: 8,
-    floor: 2,
+    status: 'available',
     features: ['Video Call', 'Coffee'],
-    status: 'available',
+    image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&w=600',
   },
   {
-    id: '3',
+    id: 3,
     name: 'Sunset Lounge',
-    capacity: 6,
     floor: 1,
-    features: ['Whiteboard', 'WiFi'],
-    status: 'booked',
-  },
-  {
-    id: '4',
-    name: 'Innovation Hub',
-    capacity: 15,
-    floor: 4,
-    features: ['Projector', 'Video Call', 'Coffee'],
-    status: 'available',
-  },
-  {
-    id: '5',
-    name: 'Creative Studio',
-    capacity: 10,
-    floor: 2,
-    features: ['Whiteboard', 'WiFi'],
-    status: 'available',
-  },
-  {
-    id: '6',
-    name: 'Executive Suite',
     capacity: 6,
-    floor: 5,
-    features: ['Video Call', 'Coffee', 'WiFi'],
     status: 'booked',
+    features: ['Whiteboard', 'WiFi'],
+    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&w=600',
+  },
+  {
+    id: 4,
+    name: 'Innovation Hub',
+    floor: 1,
+    capacity: 10,
+    status: 'available',
+    features: ['Projector', 'Coffee'],
+    image: 'https://images.pexels.com/photos/37347/office-sitting-room-executive-sitting.jpg?auto=compress&w=600',
+  },
+  {
+    id: 5,
+    name: 'Creative Studio',
+    floor: 2,
+    capacity: 7,
+    status: 'available',
+    features: ['Video Call', 'Whiteboard'],
+    image: 'https://images.pexels.com/photos/245156/pexels-photo-245156.jpeg?auto=compress&w=600',
+  },
+  {
+    id: 6,
+    name: 'Executive Suite',
+    floor: 3,
+    capacity: 5,
+    status: 'booked',
+    features: ['WiFi', 'Coffee'],
+    image: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&w=600',
   },
 ];
 
 const BookingPage = () => {
+  const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [capacityFilter, setCapacityFilter] = useState('');
+  const [featuresFilter, setFeaturesFilter] = useState([]);
 
   const filteredRooms = dummyRooms.filter(room => {
     const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCapacity = !capacityFilter || room.capacity >= parseInt(capacityFilter);
-    return matchesSearch && matchesCapacity;
+    const matchesFeatures = featuresFilter.length === 0 || room.features.some(feature => featuresFilter.includes(feature));
+    return matchesSearch && matchesCapacity && matchesFeatures;
   });
+
+  const allFeatures = ['Projector', 'Video Call', 'Whiteboard', 'WiFi', 'Coffee'];
+
+  const handleFeatureChange = (feature) => {
+    if (featuresFilter.includes(feature)) {
+      setFeaturesFilter(prev => prev.filter(f => f !== feature));
+    } else {
+      setFeaturesFilter(prev => [...prev, feature]);
+    }
+  };
 
   return (
     <PageContainer>
@@ -604,49 +737,62 @@ const BookingPage = () => {
               <SidebarTitle>Filters</SidebarTitle>
             </SidebarHeader>
             
-            <div>
+            <FilterSidebar>
+              <FilterHeader><FaFilter /> Filters</FilterHeader>
               <FilterGroup>
-                <FilterLabel>
-                  Search Rooms
-                </FilterLabel>
-                <InputContainer>
-                  <IconWrapper>
-                    <Search size={18} />
-                  </IconWrapper>
-                  <StyledInput
-                    type="text"
-                    placeholder="Room name..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </InputContainer>
+                <FilterLabel><FaThList /> Search Rooms</FilterLabel>
+                <FilterInput
+                  type="text"
+                  placeholder="Room name..."
+                  value={searchTerm}
+                  onChange={e => setSearchTerm(e.target.value)}
+                />
               </FilterGroup>
-
               <FilterGroup>
-                <FilterLabel>
-                  Minimum Capacity
-                </FilterLabel>
-                <InputContainer>
-                  <IconWrapper>
-                    <Users size={18} />
-                  </IconWrapper>
-                  <StyledSelect
-                    value={capacityFilter}
-                    onChange={(e) => setCapacityFilter(e.target.value)}
-                  >
-                    <option value="">Any size</option>
-                    <option value="4">4+ people</option>
-                    <option value="8">8+ people</option>
-                    <option value="12">12+ people</option>
-                  </StyledSelect>
-                </InputContainer>
+                <FilterLabel><FaUsers /> Minimum Capacity</FilterLabel>
+                <FilterInput
+                  type="number"
+                  min="1"
+                  value={capacityFilter}
+                  onChange={(e) => setCapacityFilter(e.target.value)}
+                  placeholder="Any size"
+                />
               </FilterGroup>
-
-              <FilterStats>
-                <FilterStatsLabel>Total rooms found</FilterStatsLabel>
-                <FilterStatsValue>{filteredRooms.length}</FilterStatsValue>
-              </FilterStats>
-            </div>
+              <FilterGroup>
+                <FilterLabel style={{ color: '#4f46e5', fontWeight: 700 }}>Filter by Features</FilterLabel>
+                <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+                  {allFeatures.map(feature => (
+                    <FeatureTag
+                      key={feature}
+                      selected={featuresFilter.includes(feature)}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={featuresFilter.includes(feature)}
+                        onChange={() => handleFeatureChange(feature)}
+                        style={{ marginRight: '0.3rem' }}
+                      /> {feature}
+                    </FeatureTag>
+                  ))}
+                </div>
+              </FilterGroup>
+              <FilterGroup style={{ marginTop: '1.2rem' }}>
+                <FilterLabel><FaLayerGroup /> Floor</FilterLabel>
+                <FilterSelectStyled
+                  value={capacityFilter}
+                  onChange={(e) => setCapacityFilter(e.target.value)}
+                >
+                  <option value="">All</option>
+                  <option value="1">1st Floor</option>
+                  <option value="2">2nd Floor</option>
+                  <option value="3">3rd Floor</option>
+                  <option value="4">4th Floor</option>
+                </FilterSelectStyled>
+              </FilterGroup>
+              <div style={{ color: '#64748b', fontSize: '1rem', marginTop: '1.2rem' }}>
+                Total rooms found <b>{filteredRooms.length}</b>
+              </div>
+            </FilterSidebar>
           </Sidebar>
 
           <ContentArea>
@@ -671,7 +817,7 @@ const BookingPage = () => {
                 <RoomCard 
                   key={room.id} 
                   room={room} 
-                  onBook={() => setSelectedRoom(room)} 
+                  onBook={(room) => { setSelectedRoom(room); setShowBookingModal(true); }}
                 />
               ))}
             </RoomsGrid>
@@ -689,14 +835,11 @@ const BookingPage = () => {
         </GridContainer>
       </MainContent>
 
-      {selectedRoom && (
+      {showBookingModal && selectedRoom && (
         <BookingModal
           room={selectedRoom}
-          onClose={() => setSelectedRoom(null)}
-          onBook={() => {
-            alert('Room booked successfully!');
-            setSelectedRoom(null);
-          }}
+          user={dummyUser}
+          onClose={() => { setShowBookingModal(false); setSelectedRoom(null); }}
         />
       )}
     </PageContainer>

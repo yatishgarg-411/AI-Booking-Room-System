@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 import UserSidebar from '../components/user/UserSidebar';
 import BookingPage from '../components/user/BookingPage';
-import MyBookingsPage from '../components/user/MyBoookingsPage';
+import MyBookingsPage from '../components/user/MyBookingsPage';
 import RoomStatusPage from '../components/user/RoomStatusPage';
 import ChatbotPage from '../components/user/ChatbotPage';
 import ProfilePage from '../components/shared/ProfilePage';
