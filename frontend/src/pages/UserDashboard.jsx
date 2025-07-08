@@ -68,14 +68,20 @@ const DateTime = styled.div`
 
 const MainGrid = styled.div`
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 2rem;
-  align-items: flex-start;
+  align-items: stretch;
 `;
 
 const MainCol = styled.div`
   flex: ${props => props.flex || 1};
   min-width: ${props => props.minWidth || 300}px;
+  display: flex;
+  flex-direction: column;
+  ${props => props.scrollable && `
+    max-height: 480px;
+    overflow-y: auto;
+  `}
 `;
 
 const QUOTES = [
@@ -103,7 +109,7 @@ const DashboardOverview = ({ name, now, quote }) => (
       <MainCol flex={2} minWidth={350}>
         <AnalyticsOverview />
       </MainCol>
-      <MainCol flex={1} minWidth={300}>
+      <MainCol flex={1} minWidth={300} scrollable>
         <RecentActivity />
       </MainCol>
     </MainGrid>

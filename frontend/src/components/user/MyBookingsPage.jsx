@@ -1,233 +1,167 @@
 // MyBookingsPage.jsx
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import React, { useState } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { FaCalendarDay, FaCalendarPlus, FaCalendarCheck, FaCalendarTimes, FaRegSmileBeam, FaRegSadTear } from 'react-icons/fa';
 import { useData } from '../../contexts/DataContext';
-import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  Users,
-  Edit3,
-  X,
-  RotateCcw,
-  Filter,
-  Search,
-  CheckCircle,
-  AlertCircle,
-  XCircle
-} from 'lucide-react';
-import { format } from 'date-fns';
-import BookingModal from './BookingModal';
+import axios from 'axios';
 
-// Dummy Data
+const gradient = 'linear-gradient(120deg, #a5b4fc 0%, #f3e8ff 100%)';
 
-
-const COLORS = ['#6366f1', '#22c55e', '#f59e42', '#ef4444'];
-
-const Container = styled.div`
-  padding: 2rem;
-  max-width: 1280px;
-  margin: 0 auto;
-`;
-
-const Header = styled.div`
-  margin-bottom: 2rem;
-`;
-
-const Controls = styled.div`
-  background: white;
-  border-radius: 1rem;
-  border: 1px solid #e5e7eb;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-`;
-
-const FilterButton = styled.button`
-  padding: 0.5rem 1rem;
-  border-radius: 0.75rem;
-  font-size: 0.875rem;
-  margin-right: 0.5rem;
-  margin-bottom: 0.5rem;
-  background: ${({ active }) => (active ? '#2563eb' : '#f3f4f6')};
-  color: ${({ active }) => (active ? 'white' : '#374151')};
-  border: ${({ active }) => (active ? 'none' : '1px solid #d1d5db')};
-  cursor: pointer;
-`;
-
-const SearchWrapper = styled.div`
+const Hero = styled.div`
+  background: ${gradient};
+  border-radius: 1.5rem;
+  padding: 2.5rem 2rem 2rem 2rem;
+  margin-bottom: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.10);
   position: relative;
-  margin-top: 1rem;
+  overflow: hidden;
+  flex-wrap: wrap;
 `;
-
-const SearchInput = styled.input`
-  width: 100%;
-  padding: 0.5rem 2rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.75rem;
-`;
-
-const BookingCard = styled.div`
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  padding: 1.2rem 2rem;
-  margin-bottom: 1.2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  border-left: 6px solid ${props => props.status === 'upcoming' ? '#6366f1' : props.status === 'ongoing' ? '#22c55e' : '#64748b'};
-`;
-
-const CButton = styled.button`
-  background: #ef4444;
-  color: white;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.4rem 1rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  align-self: flex-start;
-
-  &:hover {
-    background: #dc2626;
-  }
-`;
-
-
-const BookingContent = styled.div`
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-`;
-
-const BookingInfo = styled.div`
+const HeroText = styled.div`
   flex: 1;
 `;
-
-const RoomTitle = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 600;
-  margin-right: 0.5rem;
+const HeroTitle = styled.h2`
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #3730a3;
+  margin-bottom: 0.5rem;
+`;
+const HeroSub = styled.div`
+  color: #6366f1;
+  font-size: 1.15rem;
+  margin-bottom: 0.5rem;
+`;
+const HeroStat = styled.div`
+  font-size: 1.1rem;
+  color: #4f46e5;
+  margin-top: 0.7rem;
+`;
+const HeroIcon = styled.div`
+  font-size: 3.5rem;
+  color: #6366f1;
+  opacity: 0.18;
+  position: absolute;
+  right: 2.5rem;
+  top: 1.5rem;
 `;
 
-const StatusBadge = styled.span`
-  background: ${props => props.status === 'upcoming' ? '#e0e7ff' : props.status === 'ongoing' ? '#dcfce7' : '#fee2e2'};
-  color: ${props => props.status === 'upcoming' ? '#4f46e5' : props.status === 'ongoing' ? '#22c55e' : '#ef4444'};
-  border-radius: 0.5rem;
-  padding: 0.2rem 0.8rem;
-  font-weight: bold;
-  font-size: 1rem;
-  margin-left: 1rem;
-`;
-
-const BookingMeta = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1rem;
-  margin-top: 0.75rem;
-  font-size: 0.875rem;
-  color: #4B5563;
-`;
-
-const BookingActions = styled.div`
+const TabsBar = styled.div`
   display: flex;
-  gap: 0.5rem;
-  align-items: flex-start;
+  gap: 2.5rem;
+  margin-bottom: 2.2rem;
+  border-bottom: 2px solid #e0e7ff;
+  position: relative;
+`;
+const Tab = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: ${props => (props.active ? '#4f46e5' : '#64748b')};
+  padding: 0.7rem 0;
+  cursor: pointer;
+  position: relative;
+  outline: none;
+  transition: color 0.2s;
+`;
+const TabHighlight = styled.div`
+  position: absolute;
+  bottom: -2px;
+  left: ${props => props.left}px;
+  width: ${props => props.width}px;
+  height: 3px;
+  background: linear-gradient(90deg, #6366f1 60%, #a5b4fc 100%);
+  border-radius: 2px;
+  transition: left 0.3s, width 0.3s;
 `;
 
-const IconButton = styled.button`
-  padding: 0.5rem;
-  border-radius: 0.75rem;
-  color: #6B7280;
+const CardsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+`;
+const GlassCard = styled.div`
+  background: rgba(255,255,255,0.85);
+  border-radius: 1.2rem;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.10);
+  backdrop-filter: blur(4px);
+  padding: 1.5rem 1.5rem 1.2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  min-height: 220px;
+  transition: box-shadow 0.2s;
   &:hover {
-    background: #F3F4F6;
-    color: ${({ highlight }) => (highlight ? highlight : '#374151')};
+    box-shadow: 0 8px 32px rgba(99,102,241,0.18);
   }
 `;
-
+const RoomImg = styled.img`
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 0.8rem;
+  margin-bottom: 1rem;
+  background: #e0e7ff;
+`;
+const CardTitle = styled.div`
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.2rem;
+`;
+const CardMeta = styled.div`
+  color: #64748b;
+  font-size: 1rem;
+  margin-bottom: 0.2rem;
+`;
+const CardPurpose = styled.div`
+  color: #4f46e5;
+  font-size: 1rem;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+`;
+const StatusBadge = styled.span`
+  display: inline-block;
+  padding: 0.2rem 0.9rem;
+  border-radius: 9999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: ${props => props.bg || '#e0e7ff'};
+  color: ${props => props.color || '#4f46e5'};
+  margin-bottom: 0.2rem;
+`;
+const CancelBtn = styled.button`
+  background: linear-gradient(90deg, #ef4444 60%, #fca5a5 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1.2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 0.7rem;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.08);
+  transition: background 0.2s;
+  &:hover { background: linear-gradient(90deg, #b91c1c 60%, #fca5a5 100%); }
+`;
 const EmptyState = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 3rem 0;
+  padding: 3.5rem 0;
   color: #64748b;
   font-size: 1.2rem;
 `;
-
-const Section = styled.div`
-  margin-bottom: 2.5rem;
-`;
-
-const SectionTitle = styled.h3`
-  color: #1e293b;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-`;
-
-const CancelButton = styled.button`
-  background: #ef4444;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.4rem 1.2rem;
-  font-size: 1rem;
-  cursor: pointer;
-  align-self: flex-start;
-  margin-top: 0.5rem;
-  &:hover { background: #b91c1c; }
-`;
-
-const BookNowButton = styled.button`
-  background: #4f46e5;
-  color: #fff;
-  border: none;
-  border-radius: 0.5rem;
-  padding: 0.7rem 1.5rem;
-  font-size: 1.1rem;
-  cursor: pointer;
-  margin: 2rem auto 0 auto;
-  display: block;
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(79,70,229,0.08);
-  &:hover { background: #3730a3; }
-`;
-
-const ChartContainer = styled.div`
-  background: #fff;
-  border-radius: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-  padding: 2rem;
-  margin-bottom: 2.5rem;
-  width: 100%;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
-`;
-
-const PageContainer = styled.div`
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2.5rem 0;
-`;
-
-const CardRow = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2rem;
-`;
-
-const CardCol = styled.div`
-  flex: 1 1 320px;
-  min-width: 320px;
+const EmptyIcon = styled.div`
+  font-size: 3.5rem;
+  color: #e0e7ff;
+  margin-bottom: 1.2rem;
 `;
 
 // Helper to log recent activity
@@ -240,70 +174,64 @@ async function logRecentActivity(activity) {
   }
 }
 
+const STATUS_TABS = [
+  { key: 'Ongoing', label: 'Ongoing', icon: <FaCalendarDay /> },
+  { key: 'Upcoming', label: 'Upcoming', icon: <FaCalendarPlus /> },
+  { key: 'Previous', label: 'Previous', icon: <FaCalendarCheck /> },
+];
+const statusColors = {
+  Ongoing: { bg: '#e0e7ff', color: '#4f46e5' },
+  Upcoming: { bg: '#dcfce7', color: '#22c55e' },
+  Previous: { bg: '#f3f4f6', color: '#64748b' },
+};
+
 const MyBookingsPage = () => {
-  const [filter, setFilter] = useState('all');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [cancelBooking, setCancelBooking] = useState(null);
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState(null);
-
-  const [dummyBookings, setDummyBookings] = useState([]);
   const { name, email } = useAuth();
-  const dummyUser = { name: name, email: email };
-  const { bookings,fetchBookings } = useData();
+  const { bookings, fetchBookings } = useData();
+  const [activeTab, setActiveTab] = useState('Ongoing');
+  const [tabDims, setTabDims] = useState({ left: 0, width: 0 });
+  const tabRefs = [];
 
-
-  // Filter and search
+  // Enrich bookings
   const userBookings = bookings.filter(b => b.bookedBy === email);
+  const getStatus = (startDate, endDate, startTime, endTime, cancelled) => {
+    const now = new Date();
+    const start = new Date(`${startDate}T${startTime}`);
+    const end = new Date(`${endDate}T${endTime}`);
+    if (now < start) return 'Upcoming';
+    if (now >= start && now <= end) return 'Ongoing';
+    if (now > end) return 'Previous';
+  };
+  const enriched = userBookings.map(b => ({
+    ...b,
+    status: getStatus(b.bookingStartDate, b.bookingEndDate, b.startTime, b.endTime, b.status === 'cancelled')
+  }));
+  const grouped = {
+    Ongoing: enriched.filter(b => b.status === 'Ongoing'),
+    Upcoming: enriched.filter(b => b.status === 'Upcoming'),
+    Previous: enriched.filter(b => b.status === 'Previous'),
+  };
 
-  useEffect(() => {
-    const getStatus = (startDate, endDate, startTime, endTime) => {
-      const now = new Date();
+  // Stats for hero
+  const total = enriched.length;
+  const ongoing = grouped.Ongoing.length;
+  const upcoming = grouped.Upcoming.length;
 
-      if (!startDate || !startTime || !endDate || !endTime) {
-        return 'unknown';
-      }
+  // Tab highlight animation
+  React.useEffect(() => {
+    const idx = STATUS_TABS.findIndex(t => t.key === activeTab);
+    if (tabRefs[idx]) {
+      const rect = tabRefs[idx].getBoundingClientRect();
+      const parentRect = tabRefs[0].parentNode.getBoundingClientRect();
+      setTabDims({ left: rect.left - parentRect.left, width: rect.width });
+    }
+  }, [activeTab, bookings]);
 
-      // Construct start datetime
-      const start = new Date(`${startDate}T${startTime}`);
-      const end = new Date(`${endDate}T${endTime}`);
-
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return 'unknown';
-      }
-
-      if (now < start) return 'upcoming';
-      else if (now >= start && now <= end) return 'ongoing';
-      else return 'previous';
-    };
-
-
-    const enrichedBookings = userBookings.map(b => ({
-      ...b,
-      status: getStatus(
-        b.bookingStartDate || b.date,
-        b.bookingEndDate || b.date,
-        b.startTime,
-        b.endTime
-      )
-    }));
-
-
-    setDummyBookings(enrichedBookings);
-  }, [bookings, email]);
-
-
-  const filtered = userBookings.filter(b => {
-    const matchStatus = filter === 'all' || b.status === filter;
-    const matchSearch = (b.room || '').toLowerCase().includes((searchTerm || '').toLowerCase());
-    return matchStatus && matchSearch;
-  });
-
-  const HandleCancel=async(id)=>{
-    try{
-      const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
+  // Cancel handler
+  const HandleCancel = async (id) => {
+    try {
+      const res = await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
       alert(res.data.msg);
-      // Find the cancelled booking for activity log
       const cancelledBooking = bookings.find(b => b.bookingId === id);
       if (cancelledBooking) {
         await logRecentActivity({
@@ -319,130 +247,56 @@ const MyBookingsPage = () => {
         });
       }
       fetchBookings();
-    }
-    catch(error){
- alert("Error cancelling Booking");
-    }}
-
-  const filterOptions = [
-    { value: 'all', label: 'All' },
-    { value: 'upcoming', label: 'Upcoming' },
-    { value: 'active', label: 'Active' },
-    { value: 'completed', label: 'Completed' },
-    { value: 'cancelled', label: 'Cancelled' }
-  ];
-
-  const iconForStatus = status => {
-    switch (status) {
-      case 'upcoming': return <CheckCircle size={16} />;
-      case 'active': return <AlertCircle size={16} />;
-      case 'completed': return <CheckCircle size={16} />;
-      case 'cancelled': return <XCircle size={16} />;
-      default: return <Clock size={16} />;
+    } catch (error) {
+      alert('Error cancelling Booking');
     }
   };
 
-  const previous = dummyBookings.filter(b => b.status === 'previous');
-  const ongoing = dummyBookings.filter(b => b.status === 'ongoing');
-  const upcoming = dummyBookings.filter(b => b.status === 'upcoming');
-
-  const chartData = [
-    { name: 'Previous', value: previous.length, color: COLORS[2] },
-    { name: 'Ongoing', value: ongoing.length, color: COLORS[1] },
-    { name: 'Upcoming', value: upcoming.length, color: COLORS[0] },
-  ];
-
   return (
-    <PageContainer>
-      <h2 style={{ fontSize: '2.2rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#1e293b', textAlign: 'center' }}>
-        My Bookings
-      </h2>
-      <ChartContainer>
-        <h4 style={{ marginBottom: '1rem', color: '#1e293b', textAlign: 'center' }}>Booking Statistics</h4>
-        <ResponsiveContainer width="100%" height={220}>
-          <PieChart>
-            <Pie
-              data={chartData}
-              dataKey="value"
-              nameKey="name"
-              cx="50%"
-              cy="50%"
-              outerRadius={70}
-              label
-            >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      </ChartContainer>
-      <CardRow>
-        <CardCol>
-          <Section>
-            <SectionTitle>Previous Bookings</SectionTitle>
-            {previous.length === 0 ? <div style={{ color: '#64748b', fontStyle: 'italic' }}>No previous bookings.</div> : previous.map(b => (
-              <BookingCard key={b.id} status="previous">
-                <div><b>Room:</b> {b.room_name}</div>
-                <div>
-                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
-                    ? b.bookingStartDate
-                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
-                </div>
-                <div>
-                  <b>Time:</b> {b.startTime} - {b.endTime}
-                </div>
-
-                <div><b>Purpose:</b> {b.purpose}</div>
-              </BookingCard>
-            ))}
-          </Section>
-        </CardCol>
-        <CardCol>
-          <Section>
-            <SectionTitle>Ongoing Bookings</SectionTitle>
-           {ongoing.map(b => (
-              <BookingCard key={b.id} status="ongoing">
-                <div><b>Room:</b> {b.room_name}</div>
-                <div>
-                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
-                    ? b.bookingStartDate
-                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
-                </div>
-                <div>
-                  <b>Time:</b> {b.startTime} - {b.endTime}
-                </div>
-
-                <div><b>Purpose:</b> {b.purpose}</div>
-              </BookingCard>
-            ))}
-          </Section>
-        </CardCol>
-        <CardCol>
-          <Section>
-            <SectionTitle>Upcoming Bookings</SectionTitle>
-            {upcoming.length === 0 ? <div style={{ color: '#64748b', fontStyle: 'italic' }}>No upcoming bookings.</div> : upcoming.map(b => (
-              <BookingCard key={b.id} status="upcoming">
-
-                <div><b>Room:</b> {b.room_name}</div>
-                <div>
-                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
-                    ? b.bookingStartDate
-                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
-                </div>
-                <div>
-                  <b>Time:</b> {b.startTime} - {b.endTime}
-                </div>
-                <div><b>Purpose:</b> {b.purpose}</div>
-                <CancelButton onClick={()=>HandleCancel(b.bookingId)} >Cancel</CancelButton>
-              </BookingCard>
-            ))}
-          </Section>
-        </CardCol>
-      </CardRow>
-    </PageContainer>
+    <div style={{ maxWidth: 1100, margin: '0 auto', padding: '2.5rem 1rem 2rem 1rem' }}>
+      <Hero>
+        <HeroText>
+          <HeroTitle>{name ? ` ${name}` : ''}!!</HeroTitle>
+          <HeroSub>Your room bookings at a glance. Manage, view, or cancel with ease.</HeroSub>
+        </HeroText>
+        <HeroIcon><FaRegSmileBeam /></HeroIcon>
+      </Hero>
+      <TabsBar>
+        {STATUS_TABS.map((tab, idx) => (
+          <Tab
+            key={tab.key}
+            ref={el => tabRefs[idx] = el}
+            active={activeTab === tab.key}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.icon} &nbsp; {tab.label}
+          </Tab>
+        ))}
+        <TabHighlight left={tabDims.left} width={tabDims.width} />
+      </TabsBar>
+      {grouped[activeTab].length === 0 ? (
+        <EmptyState>
+          <EmptyIcon>{activeTab === 'Cancelled' ? <FaCalendarTimes /> : <FaRegSadTear />}</EmptyIcon>
+          No {activeTab.toLowerCase()} bookings.
+        </EmptyState>
+      ) : (
+        <CardsGrid>
+          {grouped[activeTab].map(b => (
+            <GlassCard key={b.bookingId}>
+              <CardTitle>🏷️ {b.room_name}</CardTitle>
+              <CardMeta>📅 <b>Check-in Date:</b> {b.bookingStartDate}</CardMeta>
+              <CardMeta>📆 <b>Check-out Date:</b> {b.bookingEndDate}</CardMeta>
+              <CardMeta>⏰ <b>Check-in Time:</b> {b.startTime}</CardMeta>
+              <CardMeta>🕔 <b>Check-out Time:</b> {b.endTime}</CardMeta>
+              <CardPurpose>📝 <b>Purpose:</b> {b.purpose}</CardPurpose>
+              {activeTab === 'Upcoming' && (
+                <CancelBtn onClick={() => HandleCancel(b.bookingId)}>Cancel</CancelBtn>
+              )}
+            </GlassCard>
+          ))}
+        </CardsGrid>
+      )}
+    </div>
   );
 };
 
