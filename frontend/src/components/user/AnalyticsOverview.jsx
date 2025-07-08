@@ -2,14 +2,8 @@ import React from 'react';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { FaCalendarCheck, FaCalendarTimes, FaCalendarDay, FaCalendarPlus } from 'react-icons/fa';
-
-const data = [
-  { name: 'Ongoing', value: 3, color: '#4f46e5' },
-  { name: 'Upcoming', value: 5, color: '#22c55e' },
-  { name: 'Cancelled', value: 2, color: '#ef4444' },
-];
-
-const totalBookings = data.reduce((sum, d) => sum + d.value, 0);
+import { useData } from '../../contexts/DataContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const CardGrid = styled.div`
   display: flex;
@@ -61,7 +55,41 @@ const ChartContainer = styled.div`
   max-width: 500px;
 `;
 
+const COLORS = ['#4f46e5', '#22c55e', '#ef4444', '#f59e42'];
+
+function getBookingStatus(booking) {
+  // bookingStartDate, bookingEndDate, startTime, endTime
+  const now = new Date();
+  const start = new Date(`${booking.bookingStartDate}T${booking.startTime}`);
+  const end = new Date(`${booking.bookingEndDate}T${booking.endTime}`);
+  if (booking.status === 'cancelled') return 'Cancelled';
+  if (now < start) return 'Upcoming';
+  if (now >= start && now <= end) return 'Ongoing';
+  if (now > end) return 'Completed';
+  return 'Unknown';
+}
+
 const AnalyticsOverview = () => {
+  const { bookings } = useData();
+  const { email } = useAuth();
+  const userBookings = bookings.filter(b => b.bookedBy === email);
+
+  // Calculate stats
+  let total = userBookings.length;
+  let ongoing = 0, upcoming = 0, cancelled = 0;
+  userBookings.forEach(b => {
+    const status = getBookingStatus(b);
+    if (status === 'Ongoing') ongoing++;
+    else if (status === 'Upcoming') upcoming++;
+    else if (status === 'Cancelled') cancelled++;
+  });
+
+  const data = [
+    { name: 'Ongoing', value: ongoing, color: COLORS[0] },
+    { name: 'Upcoming', value: upcoming, color: COLORS[1] },
+    { name: 'Cancelled', value: cancelled, color: COLORS[2] },
+  ];
+
   return (
     <div>
       <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1.5rem', color: '#1e293b' }}>
@@ -72,28 +100,28 @@ const AnalyticsOverview = () => {
           <StatIcon color="#6366f1"><FaCalendarCheck /></StatIcon>
           <StatInfo>
             <StatLabel>Total Bookings</StatLabel>
-            <StatValue>{totalBookings}</StatValue>
+            <StatValue>{total}</StatValue>
           </StatInfo>
         </StatCard>
         <StatCard>
           <StatIcon color="#4f46e5"><FaCalendarDay /></StatIcon>
           <StatInfo>
             <StatLabel>Ongoing</StatLabel>
-            <StatValue>{data[0].value}</StatValue>
+            <StatValue>{ongoing}</StatValue>
           </StatInfo>
         </StatCard>
         <StatCard>
           <StatIcon color="#22c55e"><FaCalendarPlus /></StatIcon>
           <StatInfo>
             <StatLabel>Upcoming</StatLabel>
-            <StatValue>{data[1].value}</StatValue>
+            <StatValue>{upcoming}</StatValue>
           </StatInfo>
         </StatCard>
         <StatCard>
           <StatIcon color="#ef4444"><FaCalendarTimes /></StatIcon>
           <StatInfo>
             <StatLabel>Cancelled</StatLabel>
-            <StatValue>{data[2].value}</StatValue>
+            <StatValue>{cancelled}</StatValue>
           </StatInfo>
         </StatCard>
       </CardGrid>

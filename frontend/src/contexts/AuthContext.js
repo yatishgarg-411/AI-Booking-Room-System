@@ -12,8 +12,9 @@ export const AuthProvider = ({ children }) => {
   const fetchUsername = async ()=>{
     try{
       const decodedToken = jwtDecode(token);
-      setEmail( decodedToken.email);
-      const res= await axios .get(`http://localhost:8000/username/${email}`);
+      const useremail=decodedToken.email
+      setEmail(useremail);
+      const res= await axios .get(`http://localhost:8000/username/${useremail}`);
        setName( res.data.name );
     }catch(error){
       if(error.response && error.response.status === 404) {
@@ -34,7 +35,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   return (
-    <AuthContext.Provider value={{ token, setToken, name, email }}>
+    <AuthContext.Provider value={{ token, setToken, name, email, fetchUsername }}>
       {children}
     </AuthContext.Provider>
   );

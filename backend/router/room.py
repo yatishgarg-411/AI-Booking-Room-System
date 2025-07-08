@@ -88,12 +88,8 @@ async def book_room(bookrequest: RoomBooking):
     # Find all bookings for the same room where date ranges overlap
     existingBookings = rooms_bookings.find({
         'roomId': bookrequest.roomId,
-        '$or': [
-            {
-                'bookingStartDate': {'$lte': bookrequest.bookingEndDate.isoformat()},
-                'bookingEndDate': {'$gte': bookrequest.bookingStartDate.isoformat()}
-            }
-        ]
+        'bookingStartDate': {'$lte': bookrequest.bookingEndDate.isoformat()},
+        'bookingEndDate': {'$gte': bookrequest.bookingStartDate.isoformat()}
     })
 
     async for existingBooking in existingBookings:

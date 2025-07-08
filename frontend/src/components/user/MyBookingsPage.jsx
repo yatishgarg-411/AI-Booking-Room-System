@@ -230,6 +230,16 @@ const CardCol = styled.div`
   min-width: 320px;
 `;
 
+// Helper to log recent activity
+async function logRecentActivity(activity) {
+  try {
+    await axios.post('http://localhost:8000/recentactivity/post', activity);
+  } catch (err) {
+    // Optionally handle/log error
+    console.error('Failed to log activity:', err);
+  }
+}
+
 const MyBookingsPage = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -292,12 +302,27 @@ const MyBookingsPage = () => {
   const HandleCancel=async(id)=>{
     try{
       const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
-      alert(res.data.msg);  
+      alert(res.data.msg);
+      // Find the cancelled booking for activity log
+      const cancelledBooking = bookings.find(b => b.bookingId === id);
+      if (cancelledBooking) {
+        await logRecentActivity({
+          type: 'booking',
+          action: 'cancelled',
+          roomName: cancelledBooking.room_name,
+          roomId: cancelledBooking.roomId,
+          user: cancelledBooking.bookedBy,
+          details: `Cancelled booking from ${cancelledBooking.bookingStartDate} ${cancelledBooking.startTime} to ${cancelledBooking.bookingEndDate} ${cancelledBooking.endTime}`,
+          bookingDetails: cancelledBooking,
+          changes: null,
+          timestamp: new Date().toISOString(),
+        });
+      }
       fetchBookings();
-  }
-  catch(error){
-alert("Error cancelling Booking");
-  }}
+    }
+    catch(error){
+ alert("Error cancelling Booking");
+    }}
 
   const filterOptions = [
     { value: 'all', label: 'All' },
