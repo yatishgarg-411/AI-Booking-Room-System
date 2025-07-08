@@ -67,9 +67,6 @@ const UserSidebar = () => (
         <StyledNavLink to="/user/my-bookings"><FaListAlt /> My Bookings</StyledNavLink>
       </NavItem>
       <NavItem>
-        <StyledNavLink to="/user/status"><FaDoorOpen /> Room Status</StyledNavLink>
-      </NavItem>
-      <NavItem>
         <StyledNavLink to="/user/chat"><FaRobot /> Chatbot</StyledNavLink>
       </NavItem>
       <NavItem>
