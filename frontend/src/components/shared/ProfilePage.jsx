@@ -1,199 +1,106 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  User,
-  Mail,
-  Shield,
-  Bell,
-  Globe,
-  Lock,
-  Save,
-  Camera,
-  MapPin,
-  Users,
-  Calendar
-} from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
+import React from 'react';
 import styled from 'styled-components';
+import { User as UserIcon, Mail, LogOut, Heart } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import {  useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    email: user?.email || '',
-    team: user?.team || '',
-    language: 'en',
-    timezone: 'UTC',
-    notifications: {
-      email: true,
-      push: true,
-      sms: false,
-      reminders: true
-    },
-    preferences: {
-      defaultDuration: '60',
-      preferredRooms: user?.preferredRooms || [],
-      autoBook: false
-    }
-  });
-
-  const tabs = [
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'preferences', label: 'Preferences', icon: MapPin },
-    { id: 'security', label: 'Security', icon: Lock }
-  ];
-
-  const handleInputChange = (e) => {
-    const { name, value, type } = e.target;
-
-    if (type === 'checkbox') {
-      const checkbox = e.target;
-      if (name.includes('.')) {
-        const [section, field] = name.split('.');
-        setFormData(prev => ({
-          ...prev,
-          [section]: {
-            ...prev[section],
-            [field]: checkbox.checked
-          }
-        }));
-      }
-    } else {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    }
-  };
-
-  const handleSave = () => {
-    console.log('Saving profile data:', formData);
-  };
+  const navigate=useNavigate();
+    const { name, email,setToken } = useAuth();
+  const logout = () =>{
+    setToken('');
+    navigate('/');
+  }
 
   return (
-    <Container>
-      <Header>
-        <h1>Profile Settings</h1>
-        <p>Manage your account settings and preferences</p>
-      </Header>
-      <Grid>
-        <Sidebar>
-          {tabs.map(tab => {
-            const Icon = tab.icon;
-            return (
-              <TabButton
-                key={tab.id}
-                isActive={activeTab === tab.id}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <Icon size={18} />
-                <span>{tab.label}</span>
-              </TabButton>
-            );
-          })}
-        </Sidebar>
-
-        <Main>
-          {/* Just placeholder text. We can extract form groups and toggles to styled components similarly. */}
-          <ContentBox>
-            <h2>{tabs.find(t => t.id === activeTab)?.label} Section</h2>
-            <p>Implement each tab's content here using styled-components.</p>
-          </ContentBox>
-          <Footer>
-            <SaveButton onClick={handleSave}>
-              <Save size={16} /> <span>Save Changes</span>
-            </SaveButton>
-          </Footer>
-        </Main>
-      </Grid>
-    </Container>
+    <Bg>
+      <CenterCard>
+        <UserImageCircle>
+          <UserIcon size={48} color="#6366f1" />
+        </UserImageCircle>
+        <UserName>{name || 'Your Name'}</UserName>
+        <UserEmail><Mail size={18} style={{marginRight:6}} />{email}</UserEmail>
+        <LogoutButton onClick={logout}>
+          <LogOut size={18} style={{marginRight:8}} /> Logout
+        </LogoutButton>
+      </CenterCard>
+      <Footer>
+        Made with <Heart size={16} color="#ef4444" style={{margin:'0 4px'}}/> by Yatish and Akshita
+      </Footer>
+    </Bg>
   );
 };
 
 export default ProfilePage;
 
 // Styled Components
-const Container = styled.div`
-  padding: 2rem;
-  max-width: 80rem;
-  margin: 0 auto;
-`;
-
-const Header = styled.div`
-  margin-bottom: 2rem;
-
-  h1 {
-    font-size: 2rem;
-    font-weight: bold;
-    color: #1f2937;
-    margin-bottom: 0.25rem;
-  }
-
-  p {
-    color: #6b7280;
-  }
-`;
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 3fr;
-  gap: 2rem;
-`;
-
-const Sidebar = styled.nav`
+const Bg = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f3e8ff 100%);
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
 `;
-
-const TabButton = styled.button`
+const CenterCard = styled.div`
+  background: #fff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 24px rgba(99,102,241,0.10);
+  padding: 2.5rem 2.5rem 2rem 2.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 320px;
+`;
+const UserImageCircle = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a5b4fc 0%, #f3e8ff 100%);
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  border: ${({ isActive }) => (isActive ? '1px solid #bfdbfe' : 'none')};
-  background-color: ${({ isActive }) => (isActive ? '#eff6ff' : 'transparent')};
-  color: ${({ isActive }) => (isActive ? '#2563eb' : '#4b5563')};
+  justify-content: center;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+`;
+const UserName = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #3730a3;
+  margin-bottom: 0.5rem;
+`;
+const UserEmail = styled.div`
+  font-size: 1.1rem;
+  color: #6366f1;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+`;
+const LogoutButton = styled.button`
+  background: linear-gradient(90deg, #6366f1 60%, #a5b4fc 100%);
+  color: #fff;
+  border: none;
+  border-radius: 0.7rem;
+  padding: 0.7rem 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s;
-
+  margin-top: 1rem;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+  display: flex;
+  align-items: center;
+  transition: background 0.2s;
   &:hover {
-    background-color: #f3f4f6;
+    background: linear-gradient(90deg, #4f46e5 60%, #a5b4fc 100%);
   }
 `;
-
-const Main = styled.div``;
-
-const ContentBox = styled.div`
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.75rem;
-  padding: 1.5rem;
-  margin-bottom: 1rem;
-`;
-
 const Footer = styled.div`
-  display: flex;
-  justify-content: flex-end;
-`;
-
-const SaveButton = styled.button`
+  margin-top: 3rem;
+  text-align: center;
+  color: #64748b;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  background-color: #2563eb;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: #1d4ed8;
-  }
+  justify-content: center;
 `;

@@ -1,31 +1,23 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 import { FaSearch, FaUsers, FaLayerGroup, FaFilter } from 'react-icons/fa';
+import { MapPin, Users, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import BookingModal from './BookingModal';
 
-const PageContainer = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f3e8ff 100%);
-`;
-
-const FilterBar = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem;
-  align-items: center;
+const FilterCard = styled.div`
   background: #fff;
-  border-radius: 2rem;
+  border-radius: 1.5rem;
   box-shadow: 0 2px 12px rgba(79,70,229,0.08);
   padding: 1.2rem 2rem;
   margin: 2rem auto 2.5rem auto;
   max-width: 1200px;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  align-items: center;
 `;
-
 const FilterInput = styled.input`
   padding: 0.7rem 1.2rem;
   border-radius: 1.5rem;
@@ -34,7 +26,6 @@ const FilterInput = styled.input`
   background: #f3f4f6;
   min-width: 160px;
 `;
-
 const FilterSelect = styled.select`
   padding: 0.7rem 1.2rem;
   border-radius: 1.5rem;
@@ -43,7 +34,6 @@ const FilterSelect = styled.select`
   background: #f3f4f6;
   min-width: 140px;
 `;
-
 const FeatureTag = styled.label`
   background: ${props => props.selected ? '#6366f1' : '#f3f4f6'};
   color: ${props => props.selected ? '#fff' : '#4f46e5'};
@@ -63,105 +53,99 @@ const FeatureTag = styled.label`
     border: 2px solid #6366f1;
   }
 `;
-
-const FloorsContainer = styled.div`
+const BlueprintContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
 `;
-
 const FloorSection = styled.div`
   margin-bottom: 2.5rem;
 `;
-
-const FloorTitle = styled.h2`
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #4f46e5;
-  margin-bottom: 1rem;
-  margin-left: 0.5rem;
-`;
-
-const RoomsRow = styled.div`
+const FloorHeader = styled.div`
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
   display: flex;
-  gap: 1.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-  scrollbar-width: thin;
-  scrollbar-color: #a5b4fc #f3f4f6;
-  &::-webkit-scrollbar {
-    height: 8px;
-    background: #f3f4f6;
-  }
-  &::-webkit-scrollbar-thumb {
-    background: #a5b4fc;
-    border-radius: 4px;
-  }
+  align-items: center;
+  gap: 12px;
+  border-radius: 16px 16px 0 0;
 `;
-
-const RoomCard = styled.div`
+const FloorLayout = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  gap: 0;
+  min-height: 220px;
+  position: relative;
   background: #fff;
-  border-radius: 1.2rem;
-  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.10);
-  border: 1.5px solid #e5e7eb;
-  min-width: 270px;
-  max-width: 300px;
-  flex: 0 0 270px;
+`;
+const SideRooms = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  gap: 16px;
+  padding: 24px;
+  background: #fafafa;
+`;
+const Passage = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  border-left: 2px dashed #d1d5db;
+  border-right: 2px dashed #d1d5db;
+`;
+const PassageLabel = styled.div`
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
+  letter-spacing: 2px;
+`;
+const RoomCard = styled.div`
+  background: ${props => props.bg};
+  border: 2px solid ${props => props.border};
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
   transition: box-shadow 0.2s, border 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   &:hover {
-    box-shadow: 0 8px 32px rgba(99,102,241,0.18);
-    border: 1.5px solid #6366f1;
+    box-shadow: 0 8px 32px rgba(99,102,241,0.10);
+    border: 2px solid #6366f1;
   }
 `;
-
-const RoomImage = styled.img`
-  width: 100%;
-  height: 140px;
-  object-fit: cover;
-  border-radius: 1.2rem 1.2rem 0 0;
-  background: #e0e7ff;
-`;
-
-const RoomContent = styled.div`
-  padding: 1.2rem 1.2rem 1.5rem 1.2rem;
+const RoomHeader = styled.div`
   display: flex;
-  flex-direction: column;
-  flex: 1;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
 `;
-
 const RoomName = styled.h3`
   font-size: 1.15rem;
   font-weight: 700;
   color: #1e293b;
   margin-bottom: 0.4rem;
 `;
-
 const RoomDetails = styled.div`
   font-size: 0.98rem;
   color: #64748b;
   margin-bottom: 0.5rem;
 `;
-
 const FeaturesList = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
   margin-bottom: 0.7rem;
 `;
-
-const StatusBadge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 0.8rem;
-  border-radius: 9999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  background: ${props => props.status === 'available' ? '#d1fae5' : '#fecaca'};
-  color: ${props => props.status === 'available' ? '#065f46' : '#991b1b'};
-  margin-bottom: 0.7rem;
+const StatusDot = styled.div`
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: ${props => props.color};
+  margin-right: 6px;
 `;
-
 const BookButton = styled.button`
   width: 100%;
   padding: 0.7rem 1rem;
@@ -179,15 +163,55 @@ const BookButton = styled.button`
     color: ${props => props.available ? '#fff' : '#9ca3af'};
   }
 `;
-
-const EmptyState = styled.div`
-  text-align: center;
-  color: #64748b;
-  font-size: 1.1rem;
-  padding: 2.5rem 0;
+const Legend = styled.div`
+  display: flex;
+  gap: 24px;
+  font-size: 12px;
+  align-items: center;
+  padding: 16px 24px;
+  background: #f9fafb;
+  border-top: 1px solid #e5e7eb;
+  border-radius: 0 0 16px 16px;
+  margin-bottom: 2.5rem;
 `;
-
 const allFeatures = ['Projector', 'Video Call', 'Whiteboard', 'WiFi', 'Coffee'];
+
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'available':
+      return {
+        bg: '#dcfce7',
+        border: '#22c55e',
+        text: '#166534',
+        dot: '#22c55e',
+        icon: <CheckCircle size={16} color="#22c55e" />
+      };
+    case 'booked':
+      return {
+        bg: '#fee2e2',
+        border: '#ef4444',
+        text: '#991b1b',
+        dot: '#ef4444',
+        icon: <Clock size={16} color="#ef4444" />
+      };
+    case 'unavailable':
+      return {
+        bg: '#fef3c7',
+        border: '#f59e0b',
+        text: '#92400e',
+        dot: '#f59e0b',
+        icon: <XCircle size={16} color="#f59e0b" />
+      };
+    default:
+      return {
+        bg: '#f3f4f6',
+        border: '#9ca3af',
+        text: '#374151',
+        dot: '#9ca3af',
+        icon: <AlertTriangle size={16} color="#9ca3af" />
+      };
+  }
+};
 
 const BookingPage = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
@@ -225,8 +249,8 @@ const BookingPage = () => {
   };
 
   return (
-    <PageContainer>
-      <FilterBar>
+    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #e0f2fe 50%, #f3e8ff 100%)' }}>
+      <FilterCard>
         <FaSearch color="#6366f1" />
         <FilterInput
           type="text"
@@ -268,28 +292,51 @@ const BookingPage = () => {
             </FeatureTag>
           ))}
         </div>
-      </FilterBar>
-      <FloorsContainer>
+      </FilterCard>
+      <BlueprintContainer>
         {roomsByFloor.every(floorObj => floorObj.rooms.length === 0) ? (
-          <EmptyState>No rooms found. Try adjusting your filters.</EmptyState>
+          <div style={{ textAlign: 'center', color: '#64748b', fontSize: '1.1rem', padding: '2.5rem 0' }}>
+            No rooms found. Try adjusting your filters.
+          </div>
         ) : (
           roomsByFloor.map(({ floor, rooms }) => (
             rooms.length > 0 && (
               <FloorSection key={floor}>
-                <FloorTitle>{floor} Floor</FloorTitle>
-                <RoomsRow>
-                  {rooms.map(room => {
-                    const status = getComputedRoomStatus(room.id);
-                    return (
-                      <RoomCard key={room.id}>
-                        <RoomImage src={room.image || '/room-placeholder.jpg'} alt={room.name} />
-                        <RoomContent>
-                          <StatusBadge status={status}>{status}</StatusBadge>
-                          <RoomName>{room.name}</RoomName>
-                          <RoomDetails>Capacity: {room.capacity}</RoomDetails>
+                <FloorHeader>
+                  <MapPin size={24} />
+                  <h2 style={{ fontSize: '20px', fontWeight: '600', margin: 0 }}>
+                    Floor {floor}
+                  </h2>
+                  <div style={{ marginLeft: 'auto', fontSize: '14px', opacity: 0.9 }}>
+                    {rooms.length} rooms
+                  </div>
+                </FloorHeader>
+                <FloorLayout>
+                  {/* Left Side Rooms */}
+                  <SideRooms>
+                    {rooms.filter((_, idx) => idx % 2 === 0).map(room => {
+                      const status = getComputedRoomStatus(room.id);
+                      const statusColors = getStatusColor(status);
+                      return (
+                        <RoomCard key={room.id} bg={statusColors.bg} border={statusColors.border}>
+                          <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                            <StatusDot color={statusColors.dot} />
+                          </div>
+                          <RoomHeader>
+                            {statusColors.icon}
+                            <RoomName>{room.name}</RoomName>
+                          </RoomHeader>
+                          <div style={{ fontSize: '14px', color: statusColors.text, lineHeight: '1.4' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                              <Users size={12} />
+                              <span>Capacity: {room.capacity}</span>
+                            </div>
+                          </div>
                           <FeaturesList>
                             {room.features && room.features.length > 0 ? room.features.map((feature, idx) => (
-                              <span key={idx} style={{ background: '#f3f4f6', borderRadius: '0.7rem', padding: '0.2rem 0.7rem', fontSize: '0.95rem', color: '#4f46e5', marginRight: 4 }}>{feature}</span>
+                              <span key={idx} style={{ background: '#f3f4f6', borderRadius: '0.7rem', padding: '0.2rem 0.7rem', fontSize: '0.95rem', color: '#4f46e5', marginRight: 4 }}>
+                                {feature === 'Projector' ? '📽️' : feature === 'Video Call' ? '🎥' : feature === 'Whiteboard' ? '📝' : feature === 'WiFi' ? '📶' : feature === 'Coffee' ? '☕' : '✨'} {feature}
+                              </span>
                             )) : (
                               <span style={{ color: '#64748b', fontSize: '0.95rem' }}>Standard amenities</span>
                             )}
@@ -297,27 +344,82 @@ const BookingPage = () => {
                           <BookButton
                             onClick={() => { setSelectedRoom(room); setShowBookingModal(true); }}
                             disabled={status === 'unavailable'}
-                            available={status !== 'unavailable'}
+                            available={status === 'available'||status === 'booked'}
                           >
                             Book Now
                           </BookButton>
-                        </RoomContent>
-                      </RoomCard>
-                    );
-                  })}
-                </RoomsRow>
+                        </RoomCard>
+                      );
+                    })}
+                  </SideRooms>
+                  {/* Passage */}
+                  <Passage>
+                    <PassageLabel>PASSAGE</PassageLabel>
+                  </Passage>
+                  {/* Right Side Rooms */}
+                  <SideRooms>
+                    {rooms.filter((_, idx) => idx % 2 === 1).map(room => {
+                      const status = getComputedRoomStatus(room.id);
+                      const statusColors = getStatusColor(status);
+                      return (
+                        <RoomCard key={room.id} bg={statusColors.bg} border={statusColors.border}>
+                          <div style={{ position: 'absolute', top: 8, right: 8 }}>
+                            <StatusDot color={statusColors.dot} />
+                          </div>
+                          <RoomHeader>
+                            {statusColors.icon}
+                            <RoomName>{room.name}</RoomName>
+                          </RoomHeader>
+                          <div style={{ fontSize: '14px', color: statusColors.text, lineHeight: '1.4' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                              <Users size={12} />
+                              <span>Capacity: {room.capacity}</span>
+                            </div>
+                          </div>
+                          <FeaturesList>
+                            {room.features && room.features.length > 0 ? room.features.map((feature, idx) => (
+                              <span key={idx} style={{ background: '#f3f4f6', borderRadius: '0.7rem', padding: '0.2rem 0.7rem', fontSize: '0.95rem', color: '#4f46e5', marginRight: 4 }}>
+                                {feature === 'Projector' ? '📽️' : feature === 'Video Call' ? '🎥' : feature === 'Whiteboard' ? '📝' : feature === 'WiFi' ? '📶' : feature === 'Coffee' ? '☕' : '✨'} {feature}
+                              </span>
+                            )) : (
+                              <span style={{ color: '#64748b', fontSize: '0.95rem' }}>Standard amenities</span>
+                            )}
+                          </FeaturesList>
+                          <BookButton
+                            onClick={() => { setSelectedRoom(room); setShowBookingModal(true); }}
+                            disabled={status === 'unavailable'}
+                            available={status === 'available'||status === 'booked'}
+                          >
+                            Book Now
+                          </BookButton>
+                        </RoomCard>
+                      );
+                    })}
+                  </SideRooms>
+                </FloorLayout>
+                <Legend>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <StatusDot color="#22c55e" /> <span>Available</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <StatusDot color="#ef4444" /> <span>Booked</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <StatusDot color="#f59e0b" /> <span>Unavailable</span>
+                  </div>
+                </Legend>
               </FloorSection>
             )
           ))
         )}
-      </FloorsContainer>
+      </BlueprintContainer>
       {showBookingModal && selectedRoom && (
         <BookingModal
           room={selectedRoom}
           onClose={() => { setShowBookingModal(false); setSelectedRoom(null); }}
         />
       )}
-    </PageContainer>
+    </div>
   );
 };
 

@@ -16,9 +16,10 @@ import UserDashboard from './pages/UserDashboard';
 function App() {
   return (
     <div className="App">
+          <BrowserRouter>
       <AuthProvider>
         <DataProvider>
-          <BrowserRouter>
+          
             <Routes>
               <Route path="/" element={<LoginPage />} />
               <Route path='test' element={<RoomDetailsModal/>}></Route>
@@ -36,9 +37,10 @@ function App() {
             </Routes>
 
 
-          </BrowserRouter>
+          
         </DataProvider>
       </AuthProvider>
+      </BrowserRouter>
     </div>
   );
 }
