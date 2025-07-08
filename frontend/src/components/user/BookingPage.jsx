@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { Calendar, Search, Users, MapPin, Filter, Star, Wifi, Monitor, Coffee } from 'lucide-react';
 import styled, { keyframes } from 'styled-components';
 import { FaFilter, FaUsers, FaLayerGroup, FaThList } from 'react-icons/fa';
+import { useData } from '../../contexts/DataContext'
+import {useAuth} from '../../contexts/AuthContext';
+import { useEffect } from 'react';
 
 // Animations
 const hoverFloat = keyframes`
@@ -501,197 +504,6 @@ const Button = styled.button`
   &:hover { background: #3730a3; }
 `;
 
-const dummyUser = { name: 'John Doe', email: 'john@example.com' };
-
-const RoomCard = ({ room, onBook }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  const getFeatureIcon = (feature) => {
-    switch (feature) {
-      case 'Projector': return <Monitor size={16} />;
-      case 'Video Call': return <Monitor size={16} />;
-      case 'Whiteboard': return <div style={{width: '16px', height: '16px', background: '#3b82f6', borderRadius: '2px'}} />;
-      case 'WiFi': return <Wifi size={16} />;
-      case 'Coffee': return <Coffee size={16} />;
-      default: return <Star size={16} />;
-    }
-  };
-
-  return (
-    <RoomCardContainer
-      isHovered={isHovered}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <RoomImageWrapper>
-        <RoomImage src={room.image || '/room-placeholder.jpg'} alt={room.name} />
-        <StatusBadge status={room.status}>{room.status}</StatusBadge>
-        <FloorInfo>
-          <MapPin size={16} />
-          <FloorText>Floor {room.floor}</FloorText>
-        </FloorInfo>
-      </RoomImageWrapper>
-      
-      <RoomContent>
-        <RoomHeader>
-          <RoomInfo>
-            <RoomName>{room.name}</RoomName>
-            <CapacityInfo>
-              <Users size={16} />
-              <CapacityText>Up to {room.capacity} people</CapacityText>
-            </CapacityInfo>
-          </RoomInfo>
-        </RoomHeader>
-        
-        <FeaturesContainer>
-          {room.features.map((feature, index) => (
-            <FeatureItem key={index}>
-              <FeatureIcon>{getFeatureIcon(feature)}</FeatureIcon>
-              <FeatureText>{feature}</FeatureText>
-            </FeatureItem>
-          ))}
-        </FeaturesContainer>
-        
-        <BookButton
-          onClick={() => { onBook(room); }}
-          disabled={room.status === 'booked'}
-          available={room.status === 'available'}
-        >
-          {room.status === 'available' ? 'Book Now' : 'Not Available'}
-        </BookButton>
-      </RoomContent>
-    </RoomCardContainer>
-  );
-};
-
-const BookingModal = ({ room, onClose, user }) => {
-  const [form, setForm] = useState({
-    name: user.name,
-    email: user.email,
-    roomName: room.name,
-    floor: room.floor,
-    features: room.features.join(', '),
-    startDate: '',
-    endDate: '',
-    startTime: '',
-    endTime: '',
-    purpose: '',
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleChange = e => {
-    const { name, value } = e.target;
-    setForm(f => ({ ...f, [name]: value }));
-  };
-
-  const handleSubmit = e => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
-
-  return (
-    <ModalOverlay onClick={onClose}>
-      <ModalContent onClick={e => e.stopPropagation()}>
-        <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1e293b' }}>
-          Book Room
-        </h2>
-        {submitted ? (
-          <div style={{ color: '#22c55e', fontWeight: 'bold', fontSize: '1.1rem' }}>
-            Room booked successfully!
-            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        ) : (
-          <Form onSubmit={handleSubmit}>
-            <Label>Name</Label>
-            <Input name="name" value={form.name} readOnly />
-            <Label>Email</Label>
-            <Input name="email" value={form.email} readOnly />
-            <Label>Room</Label>
-            <Input name="roomName" value={form.roomName} readOnly />
-            <Label>Floor</Label>
-            <Input name="floor" value={form.floor} readOnly />
-            <Label>Features</Label>
-            <Input name="features" value={form.features} readOnly />
-            <Label>Booking Start Date</Label>
-            <Input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
-            <Label>Booking End Date</Label>
-            <Input name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
-            <Label>Booking Start Time</Label>
-            <Input name="startTime" type="time" value={form.startTime} onChange={handleChange} required />
-            <Label>Booking End Time</Label>
-            <Input name="endTime" type="time" value={form.endTime} onChange={handleChange} required />
-            <Label>Purpose</Label>
-            <Input name="purpose" value={form.purpose} onChange={handleChange} required />
-            <Button type="submit">Book Room</Button>
-            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} type="button" onClick={onClose}>
-              Close
-            </Button>
-          </Form>
-        )}
-      </ModalContent>
-    </ModalOverlay>
-  );
-};
-
-const dummyRooms = [
-  {
-    id: 1,
-    name: 'Ocean View Conference Room',
-    floor: 3,
-    capacity: 12,
-    status: 'available',
-    features: ['Projector', 'Whiteboard', 'WiFi'],
-    image: 'https://images.pexels.com/photos/260689/pexels-photo-260689.jpeg?auto=compress&w=600',
-  },
-  {
-    id: 2,
-    name: 'Skyline Boardroom',
-    floor: 2,
-    capacity: 8,
-    status: 'available',
-    features: ['Video Call', 'Coffee'],
-    image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&w=600',
-  },
-  {
-    id: 3,
-    name: 'Sunset Lounge',
-    floor: 1,
-    capacity: 6,
-    status: 'booked',
-    features: ['Whiteboard', 'WiFi'],
-    image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&w=600',
-  },
-  {
-    id: 4,
-    name: 'Innovation Hub',
-    floor: 1,
-    capacity: 10,
-    status: 'available',
-    features: ['Projector', 'Coffee'],
-    image: 'https://images.pexels.com/photos/37347/office-sitting-room-executive-sitting.jpg?auto=compress&w=600',
-  },
-  {
-    id: 5,
-    name: 'Creative Studio',
-    floor: 2,
-    capacity: 7,
-    status: 'available',
-    features: ['Video Call', 'Whiteboard'],
-    image: 'https://images.pexels.com/photos/245156/pexels-photo-245156.jpeg?auto=compress&w=600',
-  },
-  {
-    id: 6,
-    name: 'Executive Suite',
-    floor: 3,
-    capacity: 5,
-    status: 'booked',
-    features: ['WiFi', 'Coffee'],
-    image: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&w=600',
-  },
-];
-
 const BookingPage = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
@@ -699,10 +511,14 @@ const BookingPage = () => {
   const [capacityFilter, setCapacityFilter] = useState('');
   const [featuresFilter, setFeaturesFilter] = useState([]);
 
-  const filteredRooms = dummyRooms.filter(room => {
-    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+  // Use actual rooms data from context
+  const { rooms } = useData();
+  const dummyUser = { name: 'John Doe', email: 'john@example.com' };
+
+  const filteredRooms = rooms.filter(room => {
+    const matchesSearch = room.name && room.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCapacity = !capacityFilter || room.capacity >= parseInt(capacityFilter);
-    const matchesFeatures = featuresFilter.length === 0 || room.features.some(feature => featuresFilter.includes(feature));
+    const matchesFeatures = featuresFilter.length === 0 || (room.features && room.features.some(feature => featuresFilter.includes(feature)));
     return matchesSearch && matchesCapacity && matchesFeatures;
   });
 
@@ -787,6 +603,7 @@ const BookingPage = () => {
                   <option value="2">2nd Floor</option>
                   <option value="3">3rd Floor</option>
                   <option value="4">4th Floor</option>
+                  <option value="5">5th Floor</option>
                 </FilterSelectStyled>
               </FilterGroup>
               <div style={{ color: '#64748b', fontSize: '1rem', marginTop: '1.2rem' }}>
@@ -817,7 +634,7 @@ const BookingPage = () => {
                 <RoomCard 
                   key={room.id} 
                   room={room} 
-                  onBook={(room) => { setSelectedRoom(room); setShowBookingModal(true); }}
+                  onBook={() => { setSelectedRoom(room); setShowBookingModal(true); }}
                 />
               ))}
             </RoomsGrid>
@@ -845,5 +662,191 @@ const BookingPage = () => {
     </PageContainer>
   );
 };
+
+const RoomCard = ({ room, onBook }) => {
+  const [isHovered, setIsHovered] = useState(false);
+  const getFeatureIcon = (feature) => {
+    switch (feature) {
+      case 'Projector': return <Monitor size={16} />;
+      case 'Video Call': return <Monitor size={16} />;
+      case 'Whiteboard': return <div style={{width: '16px', height: '16px', background: '#3b82f6', borderRadius: '2px'}} />;
+      case 'WiFi': return <Wifi size={16} />;
+      case 'Coffee': return <Coffee size={16} />;
+      default: return <Star size={16} />;
+    }
+  };
+  return (
+    <RoomCardContainer
+      isHovered={isHovered}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      <RoomImageWrapper>
+        <RoomImage src={room.image || '/room-placeholder.jpg'} alt={room.name} />
+        <StatusBadge status={room.status}>{room.status}</StatusBadge>
+        <FloorInfo>
+          <MapPin size={16} />
+          <FloorText>Floor {room.floor}</FloorText>
+        </FloorInfo>
+      </RoomImageWrapper>
+      <RoomContent>
+        <RoomHeader>
+          <RoomInfo>
+            <RoomName>{room.name}</RoomName>
+            <CapacityInfo>
+              <Users size={16} />
+              <CapacityText>Up to {room.capacity} people</CapacityText>
+            </CapacityInfo>
+          </RoomInfo>
+        </RoomHeader>
+        <FeaturesContainer>
+          {room.features && room.features.length > 0 ? room.features.map((feature, index) => (
+            <FeatureItem key={index}>
+              <FeatureIcon>{getFeatureIcon(feature)}</FeatureIcon>
+              <FeatureText>{feature}</FeatureText>
+            </FeatureItem>
+          )) : (
+            <FeatureItem>
+              <FeatureIcon><Star size={16} /></FeatureIcon>
+              <FeatureText>Standard amenities</FeatureText>
+            </FeatureItem>
+          )}
+        </FeaturesContainer>
+        <BookButton
+          onClick={onBook}
+          disabled={room.status === 'booked' || room.status === 'unavailable'}
+          available={room.status === 'available'}
+        >
+          {room.status === 'available' ? 'Book Now' : 'Not Available'}
+        </BookButton>
+      </RoomContent>
+    </RoomCardContainer>
+  );
+};
+
+const BookingModal = ({ room, onClose, user }) => {
+  const { addBooking, actActivity} = useData();
+  const roomName = room.name || 'Unnamed Room';
+  const roomFloor = room.floor || 'N/A';
+  const roomFeatures = room.features || [];
+  
+  const [form, setForm] = useState({
+    name: user.name,
+    email: user.email,
+    roomName: roomName,
+    floor: roomFloor,
+    features: roomFeatures.join(', '),
+    startDate: '',
+    endDate: '',
+    startTime: '',
+    endTime: '',
+    purpose: '',
+  });
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <ModalOverlay onClick={onClose}>
+      <ModalContent onClick={e => e.stopPropagation()}>
+        <h2 style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '1rem', color: '#1e293b' }}>
+          Book Room
+        </h2>
+        {submitted ? (
+          <div style={{ color: '#22c55e', fontWeight: 'bold', fontSize: '1.1rem' }}>
+            Room booked successfully!
+            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        ) : (
+          <Form onSubmit={handleSubmit}>
+            <Label>Name</Label>
+            <Input name="name" value={form.name} readOnly />
+            <Label>Email</Label>
+            <Input name="email" value={form.email} readOnly />
+            <Label>Room</Label>
+            <Input name="roomName" value={form.roomName} readOnly />
+            <Label>Floor</Label>
+            <Input name="floor" value={form.floor} readOnly />
+            <Label>Features</Label>
+            <Input name="features" value={form.features} readOnly />
+            <Label>Booking Start Date</Label>
+            <Input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
+            <Label>Booking End Date</Label>
+            <Input name="endDate" type="date" value={form.endDate} onChange={handleChange} required />
+            <Label>Booking Start Time</Label>
+            <Input name="startTime" type="time" value={form.startTime} onChange={handleChange} required />
+            <Label>Booking End Time</Label>
+            <Input name="endTime" type="time" value={form.endTime} onChange={handleChange} required />
+            <Label>Purpose</Label>
+            <Input name="purpose" value={form.purpose} onChange={handleChange} required />
+            <Button type="submit">Book Room</Button>
+            <Button style={{ background: '#e5e7eb', color: '#1e293b', marginLeft: 8 }} type="button" onClick={onClose}>
+              Close
+            </Button>
+          </Form>
+        )}
+      </ModalContent>
+    </ModalOverlay>
+  );
+};
+
+
+  // {
+  //   id: 2,
+  //   name: 'Skyline Boardroom',
+  //   floor: 2,
+  //   capacity: 8,
+  //   status: 'available',
+  //   features: ['Video Call', 'Coffee'],
+  //   image: 'https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&w=600',
+  // },
+  // {
+  //   id: 3,
+  //   name: 'Sunset Lounge',
+  //   floor: 1,
+  //   capacity: 6,
+  //   status: 'booked',
+  //   features: ['Whiteboard', 'WiFi'],
+  //   image: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg?auto=compress&w=600',
+  // },
+  // {
+  //   id: 4,
+  //   name: 'Innovation Hub',
+  //   floor: 1,
+  //   capacity: 10,
+  //   status: 'available',
+  //   features: ['Projector', 'Coffee'],
+  //   image: 'https://images.pexels.com/photos/37347/office-sitting-room-executive-sitting.jpg?auto=compress&w=600',
+  // },
+  // {
+  //   id: 5,
+  //   name: 'Creative Studio',
+  //   floor: 2,
+  //   capacity: 7,
+  //   status: 'available',
+  //   features: ['Video Call', 'Whiteboard'],
+  //   image: 'https://images.pexels.com/photos/245156/pexels-photo-245156.jpeg?auto=compress&w=600',
+  // },
+  // {
+  //   id: 6,
+  //   name: 'Executive Suite',
+  //   floor: 3,
+  //   capacity: 5,
+  //   status: 'booked',
+  //   features: ['WiFi', 'Coffee'],
+  //   image: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg?auto=compress&w=600',
+  // },
+
+
 
 export default BookingPage;
