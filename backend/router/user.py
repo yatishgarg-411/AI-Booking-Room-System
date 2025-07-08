@@ -2,6 +2,7 @@ from fastapi import APIRouter,HTTPException
 from models.user import User_Signup, User_Login
 from config.database import user_collection,admin_collection
 from auth.jwt_handler import create_token
+from pydantic import EmailStr
 
 
 router=APIRouter()
@@ -45,3 +46,10 @@ async def user_login(user: User_Login):
     
     token = create_token({'email': existing['email']})
     return {'msg': "Login Successful", 'token': token}
+
+@router.get('/username/{email}')
+async def get_username(email:EmailStr):
+    existing= await user_collection.find_one({'email':email})
+    if not existing:
+        raise HTTPException(status_code=404, detail="User does not exist")
+    return {'name': existing['name']}

@@ -513,7 +513,8 @@ const BookingPage = () => {
 
   // Use actual rooms data from context
   const { rooms } = useData();
-  const dummyUser = { name: 'John Doe', email: 'john@example.com' };
+  const {name,email} = useAuth(); 
+  const dummyUser = { name: name , email: email };
 
   const filteredRooms = rooms.filter(room => {
     const matchesSearch = room.name && room.name.toLowerCase().includes(searchTerm.toLowerCase());
