@@ -1,7 +1,10 @@
 // MyBookingsPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useData } from '../../contexts/DataContext';
+import axios from 'axios';
+import { useAuth } from '../../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
@@ -21,14 +24,7 @@ import { format } from 'date-fns';
 import BookingModal from './BookingModal';
 
 // Dummy Data
-const dummyUser = { name: 'John Doe', email: 'john@example.com' };
-const dummyBookings = [
-  { id: 1, room: '101', floor: 1, status: 'upcoming', date: '2024-07-10', time: '10:00-12:00', purpose: 'Meeting' },
-  { id: 2, room: '202', floor: 2, status: 'ongoing', date: '2024-07-07', time: '09:00-11:00', purpose: 'Workshop' },
-  { id: 3, room: '303', floor: 3, status: 'previous', date: '2024-06-20', time: '14:00-16:00', purpose: 'Interview' },
-  { id: 4, room: '404', floor: 4, status: 'previous', date: '2024-06-10', time: '12:00-13:00', purpose: 'Review' },
-  { id: 5, room: '505', floor: 5, status: 'upcoming', date: '2024-07-15', time: '15:00-17:00', purpose: 'Presentation' },
-];
+
 
 const COLORS = ['#6366f1', '#22c55e', '#f59e42', '#ef4444'];
 
@@ -85,6 +81,22 @@ const BookingCard = styled.div`
   gap: 0.5rem;
   border-left: 6px solid ${props => props.status === 'upcoming' ? '#6366f1' : props.status === 'ongoing' ? '#22c55e' : '#64748b'};
 `;
+
+const CButton = styled.button`
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  align-self: flex-start;
+
+  &:hover {
+    background: #dc2626;
+  }
+`;
+
 
 const BookingContent = styled.div`
   padding: 1.5rem;
@@ -225,13 +237,67 @@ const MyBookingsPage = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
 
+  const [dummyBookings, setDummyBookings] = useState([]);
+  const { name, email } = useAuth();
+  const dummyUser = { name: name, email: email };
+  const { bookings,fetchBookings } = useData();
+
+
   // Filter and search
-  const userBookings = dummyBookings.filter(b => b.userId === dummyUser.id);
+  const userBookings = bookings.filter(b => b.bookedBy === email);
+
+  useEffect(() => {
+    const getStatus = (startDate, endDate, startTime, endTime) => {
+      const now = new Date();
+
+      if (!startDate || !startTime || !endDate || !endTime) {
+        return 'unknown';
+      }
+
+      // Construct start datetime
+      const start = new Date(`${startDate}T${startTime}`);
+      const end = new Date(`${endDate}T${endTime}`);
+
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return 'unknown';
+      }
+
+      if (now < start) return 'upcoming';
+      else if (now >= start && now <= end) return 'ongoing';
+      else return 'previous';
+    };
+
+
+    const enrichedBookings = userBookings.map(b => ({
+      ...b,
+      status: getStatus(
+        b.bookingStartDate || b.date,
+        b.bookingEndDate || b.date,
+        b.startTime,
+        b.endTime
+      )
+    }));
+
+
+    setDummyBookings(enrichedBookings);
+  }, [bookings, email]);
+
+
   const filtered = userBookings.filter(b => {
     const matchStatus = filter === 'all' || b.status === filter;
     const matchSearch = (b.room || '').toLowerCase().includes((searchTerm || '').toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const HandleCancel=async(id)=>{
+    try{
+      const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
+      alert(res.data.msg);  
+      fetchBookings();
+  }
+  catch(error){
+alert("Error cancelling Booking");
+  }}
 
   const filterOptions = [
     { value: 'all', label: 'All' },
@@ -294,10 +360,16 @@ const MyBookingsPage = () => {
             <SectionTitle>Previous Bookings</SectionTitle>
             {previous.length === 0 ? <div style={{ color: '#64748b', fontStyle: 'italic' }}>No previous bookings.</div> : previous.map(b => (
               <BookingCard key={b.id} status="previous">
-                <div><b>Room:</b> {b.room}</div>
-                <div><b>Floor:</b> {b.floor}</div>
-                <div><b>Date:</b> {b.date}</div>
-                <div><b>Time:</b> {b.time}</div>
+                <div><b>Room:</b> {b.room_name}</div>
+                <div>
+                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
+                    ? b.bookingStartDate
+                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
+                </div>
+                <div>
+                  <b>Time:</b> {b.startTime} - {b.endTime}
+                </div>
+
                 <div><b>Purpose:</b> {b.purpose}</div>
               </BookingCard>
             ))}
@@ -306,14 +378,18 @@ const MyBookingsPage = () => {
         <CardCol>
           <Section>
             <SectionTitle>Ongoing Bookings</SectionTitle>
-            {ongoing.length === 0 ? (
-              <BookNowButton onClick={() => setShowBookingModal(true)}>Book Now</BookNowButton>
-            ) : ongoing.map(b => (
+           {ongoing.map(b => (
               <BookingCard key={b.id} status="ongoing">
-                <div><b>Room:</b> {b.room}</div>
-                <div><b>Floor:</b> {b.floor}</div>
-                <div><b>Date:</b> {b.date}</div>
-                <div><b>Time:</b> {b.time}</div>
+                <div><b>Room:</b> {b.room_name}</div>
+                <div>
+                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
+                    ? b.bookingStartDate
+                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
+                </div>
+                <div>
+                  <b>Time:</b> {b.startTime} - {b.endTime}
+                </div>
+
                 <div><b>Purpose:</b> {b.purpose}</div>
               </BookingCard>
             ))}
@@ -324,23 +400,23 @@ const MyBookingsPage = () => {
             <SectionTitle>Upcoming Bookings</SectionTitle>
             {upcoming.length === 0 ? <div style={{ color: '#64748b', fontStyle: 'italic' }}>No upcoming bookings.</div> : upcoming.map(b => (
               <BookingCard key={b.id} status="upcoming">
-                <div><b>Room:</b> {b.room}</div>
-                <div><b>Floor:</b> {b.floor}</div>
-                <div><b>Date:</b> {b.date}</div>
-                <div><b>Time:</b> {b.time}</div>
+
+                <div><b>Room:</b> {b.room_name}</div>
+                <div>
+                  <b>Date:</b> {b.bookingStartDate === b.bookingEndDate
+                    ? b.bookingStartDate
+                    : `${b.bookingStartDate} to ${b.bookingEndDate}`}
+                </div>
+                <div>
+                  <b>Time:</b> {b.startTime} - {b.endTime}
+                </div>
                 <div><b>Purpose:</b> {b.purpose}</div>
+                <CancelButton onClick={()=>HandleCancel(b.bookingId)} >Cancel</CancelButton>
               </BookingCard>
             ))}
           </Section>
         </CardCol>
       </CardRow>
-      {showBookingModal && (
-        <BookingModal
-          room={{ name: '', floor: '', features: [] }}
-          onClose={() => setShowBookingModal(false)}
-          prefillUser={dummyUser}
-        />
-      )}
     </PageContainer>
   );
 };
