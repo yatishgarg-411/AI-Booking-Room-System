@@ -593,26 +593,39 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button
-                onClick={()=>setActiveTab('settings')}
-                style={{ ...styles.closeBtn, color: '#6b7280' }}
-                title="Edit Room"
-              >
-                <Edit3 style={{ width: 20, height: 20 }} />
-              </button>
-                              <button
-                  onClick={() => setActiveTab('settings')}
-                  style={{ ...styles.closeBtn, color: '#ef4444' }}
-                  title="Delete Room"
+              {userMode ? (
+                <button
+                  onClick={onClose}
+                  style={styles.closeBtn}
                 >
-                <Trash2 style={{ width: 20, height: 20 }} />
-              </button>
-              <button
-                onClick={onClose}
-                style={styles.closeBtn}
-              >
-                <X style={{ width: 24, height: 24 }} />
-              </button>
+                  <X style={{ width: 24, height: 24 }} />
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    style={{ ...styles.closeBtn, color: '#6b7280' }}
+                    title="Edit Room"
+                  >
+                    <Edit3 style={{ width: 20, height: 20 }} />
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('settings')}
+                    style={{ ...styles.closeBtn, color: '#ef4444' }}
+                    title="Delete Room"
+                  >
+                    <Trash2 style={{ width: 20, height: 20 }} />
+                  </button>
+                  <button
+                    onClick={onClose}
+                    style={styles.closeBtn}
+                  >
+                    <X style={{ width: 24, height: 24 }} />
+                  </button>
+                </>
+              )}
+
+              
             </div>
           </div>
 

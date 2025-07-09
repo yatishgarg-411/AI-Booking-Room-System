@@ -46,10 +46,7 @@ export const DataProvider = ({ children }) => {
     try{
       const res= await axios.get(`http://localhost:8000/rooms`);
       setRooms(res.data);
-      // Update analytics after fetching rooms
-      setTimeout(() => {
-        updateAnalytics();
-      }, 100);
+      // Removed setTimeout-based updateAnalytics
     }catch(error){
       alert(error);
     }
@@ -64,10 +61,7 @@ export const DataProvider = ({ children }) => {
     try{
       const res= await axios.get(`http://localhost:8000/room/bookings/all`);
       setBookings(res.data);
-      // Update analytics after fetching bookings
-      setTimeout(() => {
-        updateAnalytics();
-      }, 100);
+      // Removed setTimeout-based updateAnalytics
     }catch(error){
       alert(error);
     }
@@ -116,20 +110,13 @@ export const DataProvider = ({ children }) => {
     fetchActivities();
   },[]);
 
-  // Initialize analytics when data is first loaded
-  useEffect(() => {
-    if (rooms.length > 0) {
-      updateAnalytics();
-    }
-  }, [rooms.length]);
-
-  // Update room statuses and analytics when bookings change
+  // Use a single useEffect that watches both rooms and bookings
   useEffect(() => {
     if (rooms.length > 0 && bookings.length >= 0) {
       updateRoomStatuses();
       updateAnalytics();
     }
-  }, [bookings, rooms.length]);
+  }, [rooms, bookings]);
 
   const [conflicts, setConflicts] = useState([
     {

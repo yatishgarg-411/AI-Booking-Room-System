@@ -1,14 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { 
-  BarChart3, 
-  Map, 
-  MessageSquare, 
-  User,
-  AlertTriangle,
-  TrendingUp,
-  Shield
-} from 'lucide-react';
+import { BarChart3, Map, MessageSquare, User,TrendingUp,} from 'lucide-react';
 import { motion } from 'framer-motion';
 import styled from 'styled-components';
 
@@ -35,75 +27,6 @@ const SidebarContainer = styled.div`
     pointer-events: none;
     z-index: 0;
   }
-`;
-
-const ProfileSection = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 2.2rem 1.5rem 1.2rem 1.5rem;
-  background: rgba(255,255,255,0.8);
-  z-index: 2;
-`;
-
-const Avatar = styled.div`
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(102,126,234,0.13);
-  border: 3px solid #e0e7ff;
-  overflow: hidden;
-`;
-
-const ProfileName = styled.div`
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #374151;
-`;
-
-const Header = styled.div`
-  padding: 1.2rem 1.5rem 1.5rem 1.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 0 0 1.5rem 1.5rem;
-  box-shadow: 0 4px 16px rgba(102,126,234,0.08);
-  margin-bottom: 1.2rem;
-  z-index: 2;
-`;
-
-const HeaderTop = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
-`;
-
-const LogoCircle = styled.div`
-  background: linear-gradient(135deg, #ffb347 0%, #ffcc33 100%);
-  border-radius: 50%;
-  padding: 0.9rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(255,204,51,0.12);
-`;
-
-const Title = styled.h2`
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #fff;
-  margin: 0;
-`;
-
-const Subtitle = styled.p`
-  font-size: 0.95rem;
-  color: #f3f4f6;
-  margin: 0;
-  font-weight: 400;
 `;
 
 const Nav = styled.nav`
@@ -178,41 +101,6 @@ const MenuDesc = styled.div`
   margin-top: 0.2rem;
 `;
 
-const Footer = styled.div`
-  padding: 1.2rem 1rem 1.5rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 1.5rem 1.5rem 0 0;
-  box-shadow: 0 -2px 12px rgba(102,126,234,0.06);
-  z-index: 2;
-`;
-
-const AccessCard = styled.div`
-  background: rgba(255,255,255,0.85);
-  border-radius: 1rem;
-  padding: 1.1rem 1rem;
-  color: #6366f1;
-  box-shadow: 0 2px 8px rgba(102,126,234,0.10);
-`;
-
-const AccessTop = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  margin-bottom: 0.5rem;
-`;
-
-const AccessText = styled.span`
-  font-size: 1rem;
-  font-weight: 600;
-`;
-
-const AccessNote = styled.p`
-  font-size: 0.85rem;
-  opacity: 0.9;
-  margin: 0;
-  line-height: 1.4;
-`;
-
 // Main Component
 const AdminSidebar = () => {
   const location = useLocation();
@@ -229,7 +117,6 @@ const AdminSidebar = () => {
 
   return (
     <SidebarContainer>
-      {/* Removed Header and LogoCircle section for a cleaner sidebar */}
       <Nav>
         {menuItems.map((item, idx) => {
           const Icon = item.icon;
@@ -246,7 +133,6 @@ const AdminSidebar = () => {
             >
               <MenuIcon>
                 <span style={{ fontSize: '1.3em', marginRight: '0.2em' }}>{emojiIcons[idx]}</span>
-                <Icon size={22} color={isActive ? '#6366f1' : '#a5b4fc'} />
               </MenuIcon>
               <MenuText>
                 <MenuTitle active={isActive}>{item.name}</MenuTitle>
