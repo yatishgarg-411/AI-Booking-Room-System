@@ -1,7 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import styled from 'styled-components';
-import Header from '../components/shared/Header';
 import AdminSidebar from '../components/admin/AdminSidebar';
 
 
@@ -19,14 +18,14 @@ const ContentArea = styled.div`
 
 const AdminDashboard = () => {
   return (
-    <><Header /><DashboardWrapper>
+    <DashboardWrapper>
       <AdminSidebar />
       <ContentArea>
 
         <Outlet />
 
       </ContentArea>
-    </DashboardWrapper></>
+    </DashboardWrapper>
   );
 };
 

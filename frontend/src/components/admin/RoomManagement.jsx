@@ -120,10 +120,10 @@ const RoomManagement = () => {
 
   const floors = Array.from(new Set(rooms.map((room) => room.floor))).sort();
 
-  useEffect(()=>{
-    fetchRooms();
-  },[]);
-
+  // Remove this useEffect:
+  // useEffect(() => {
+  //   fetchRooms();
+  // }, []);
 
 
   const findBookingId = (id) => {

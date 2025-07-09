@@ -291,10 +291,24 @@ export const DataProvider = ({ children }) => {
     }
   };
 
+  // Sort rooms by room number for consistent ordering
+  const sortedRooms = [...rooms].sort((a, b) => {
+    // Extract room number from room name (e.g., "Room 1" -> 1, "Room 10" -> 10)
+    const getRoomNumber = (roomName) => {
+      const match = roomName.match(/\d+/);
+      return match ? parseInt(match[0]) : 0;
+    };
+    
+    const roomNumberA = getRoomNumber(a.name);
+    const roomNumberB = getRoomNumber(b.name);
+    
+    return roomNumberA - roomNumberB;
+  });
+
   return (
     <DataContext.Provider
       value={{
-        rooms,
+        rooms: sortedRooms,
         bookings,
         conflicts,
         analytics,
