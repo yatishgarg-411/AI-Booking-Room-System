@@ -114,9 +114,15 @@ export const DataProvider = ({ children }) => {
   useEffect(() => {
     if (rooms.length > 0 && bookings.length >= 0) {
       updateRoomStatuses();
+      
+    }
+  }, [bookings]);
+
+  useEffect(() => {
+    if (rooms.length > 0 && bookings.length >= 0) {
       updateAnalytics();
     }
-  }, [rooms, bookings]);
+  }, [ bookings]);
 
   const [conflicts, setConflicts] = useState([
     {
