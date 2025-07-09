@@ -29,7 +29,7 @@ function displayTime(timeStr) {
   return timeStr.length >= 5 ? timeStr.slice(0,5) : timeStr;
 }
 
-const RoomDetailsModal = ({room,onClose,initialTab}) => {
+const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom}) => {
   console.log(initialTab);
   const { fetchRooms, fetchBookings, bookings, setRoomStatus, getComputedRoomStatus, addActivity } = useData();
   const { user } = useAuth();
@@ -44,8 +44,9 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
   const [allRoomBookings, setAllRoomBookings] = useState([]);//All Bookings of the particular room are fetched here
   const [computedStatus, setComputedStatus] = useState('');
   const [statusColor, setStatusColor] = useState({ background: '#d1fae5', color: '#065f46', border: '1px solid #bbf7d0' });
+  // Prefill booking form with user email if userMode
   const [bookingForm, setBookingForm] = useState({
-    bookedBy: user?.email || '',
+    bookedBy: userMode ? (user?.email || '') : (user?.email || ''),
     bookingStartDate: '',
     bookingEndDate: '',
     startTime: '',
@@ -375,11 +376,17 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
     ...dynamicFeatures
   ];
 
-  const tabs = [
-    { id: 'details', label: 'Room Details', icon: MapPin },
-    { id: 'bookings', label: 'Booking History', icon: History },
-    { id: 'settings', label: 'Settings', icon: Settings }
-  ];
+  // Only show tabs allowed for this mode
+  const tabs = userMode
+    ? [
+        { id: 'details', label: 'Room Details', icon: MapPin },
+        { id: 'bookings', label: 'Bookings', icon: History }
+      ]
+    : [
+        { id: 'details', label: 'Room Details', icon: MapPin },
+        { id: 'bookings', label: 'Booking History', icon: History },
+        { id: 'settings', label: 'Settings', icon: Settings }
+      ];
 
   // Inline style helpers
   const styles = {
@@ -783,87 +790,109 @@ const RoomDetailsModal = ({room,onClose,initialTab}) => {
             {/* Bookings Tab */}
             {activeTab === 'bookings' && (
               <div style={{ padding: 24 }}>
+                {userMode ? (
+                  <>
+                    {ongoing && (
+                      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                        <h4 style={{ fontWeight: 500, color: '#991b1b', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <User style={{ width: 16, height: 16 }} />
+                          <span>Ongoing Booking</span>
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
+                          <div><b>Date:</b> {displayDate(ongoing.bookingStartDate || ongoing.date)} - {displayDate(ongoing.bookingEndDate || ongoing.date)}</div>
+                          <div><b>Time:</b> {displayTime(ongoing.startTime)} - {displayTime(ongoing.endTime)}</div>
+                        </div>
+                      </div>
+                    )}
+                    {upcoming.length > 0 ? (
+                      <div>
+                        <h4 style={{ fontWeight: 500, color: '#2563eb', marginBottom: 8 }}>Upcoming Bookings</h4>
+                        {upcoming.map((booking) => (
+                          <div key={booking.id} style={{ border: '1px solid #bfdbfe', borderRadius: 8, padding: 12, background: '#eff6ff', marginBottom: 8 }}>
+                            <div><b>Date:</b> {displayDate(booking.bookingStartDate || booking.date)} - {displayDate(booking.bookingEndDate || booking.date)}</div>
+                            <div><b>Time:</b> {displayTime(booking.startTime)} - {displayTime(booking.endTime)}</div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ color: '#6b7280', fontSize: 13 }}>No upcoming bookings</div>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {/* Ongoing Booking */}
+                    {ongoing && (
+                      <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 16, marginBottom: 16 }}>
+                        <h4 style={{ fontWeight: 500, color: '#991b1b', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <User style={{ width: 16, height: 16 }} />
+                          <span>Ongoing Booking</span>
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
+                          <div><b>Booked by:</b> {ongoing.bookedBy}</div>
+                          <div><b>Start Date:</b> {displayDate(ongoing.bookingStartDate || ongoing.date)}</div>
+                          <div><b>End Date:</b> {displayDate(ongoing.bookingEndDate || ongoing.date)}</div>
+                          <div><b>Time:</b> {displayTime(ongoing.startTime)} - {displayTime(ongoing.endTime)}</div>
+                          <div><b>Purpose:</b> {ongoing.purpose}</div>
+                        </div>
+                        {/* Admin actions ... */}
+                        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                          <button
+                            onClick={handleReleaseRoom}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
+                          >
+                            <XCircle style={{ width: 16, height: 16 }} />
+                            <span>Release</span>
+                          </button>
+                          <button
+                            onClick={() => setShowExtendModal(true)}
+                            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#22c55e', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
+                          >
+                            <RotateCcw style={{ width: 16, height: 16 }} />
+                            <span>Extend</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                    {/* Upcoming Bookings */}
+                    {upcoming.length > 0 && (
+                      <div style={{ marginBottom: 16 }}>
+                        <h4 style={{ fontWeight: 500, color: '#2563eb', marginBottom: 8 }}>Upcoming Bookings</h4>
+                        {upcoming.map((booking) => (
+                          <div key={booking.id} style={{ border: '1px solid #bfdbfe', borderRadius: 8, padding: 12, background: '#eff6ff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div>
+                              <div><b>Booked by:</b> {booking.bookedBy}</div>
+                              <div><b>Start Date:</b> {displayDate(booking.bookingStartDate || booking.date)}</div>
+                              <div><b>End Date:</b> {displayDate(booking.bookingEndDate || booking.date)}</div>
+                              <div><b>Time:</b> {displayTime(booking.startTime)} - {displayTime(booking.endTime)}</div>
+                              <div><b>Purpose:</b> {booking.purpose}</div>
+                            </div>
+                            <button
+                              style={{ padding: '6px 14px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13 }} onClick={()=>handleCancelBooking(booking.bookingId)}
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
 
-                {/* Ongoing Booking */}
-                {ongoing && (
-                  <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, padding: 16, marginBottom: 16 }}>
-                    <h4 style={{ fontWeight: 500, color: '#991b1b', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <User style={{ width: 16, height: 16 }} />
-                      <span>Ongoing Booking</span>
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 14 }}>
-                      <div><b>Booked by:</b> {ongoing.bookedBy}</div>
-                      <div><b>Start Date:</b> {displayDate(ongoing.bookingStartDate || ongoing.date)}</div>
-                      <div><b>End Date:</b> {displayDate(ongoing.bookingEndDate || ongoing.date)}</div>
-                      <div><b>Time:</b> {displayTime(ongoing.startTime)} - {displayTime(ongoing.endTime)}</div>
-                      <div><b>Purpose:</b> {ongoing.purpose}</div>
-                    </div>
-
-
-                    <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-
-                      <button
-                        onClick={handleReleaseRoom}
-                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
-                      >
-                        <XCircle style={{ width: 16, height: 16 }} />
-                        <span>Release</span>
-                      </button>
-
-
-
-                      <button
-                        onClick={() => setShowExtendModal(true)}//Here Now Extend Room form will pop-up
-                        style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#22c55e', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14 }}
-                      >
-                        <RotateCcw style={{ width: 16, height: 16 }} />
-                        <span>Extend</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-
-
-                {/* Upcoming Bookings */}
-                {upcoming.length > 0 && (
-                  <div style={{ marginBottom: 16 }}>
-                    <h4 style={{ fontWeight: 500, color: '#2563eb', marginBottom: 8 }}>Upcoming Bookings</h4>
-                    {upcoming.map((booking) => (
-                      <div key={booking.id} style={{ border: '1px solid #bfdbfe', borderRadius: 8, padding: 12, background: '#eff6ff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
+                    {/* Past Bookings (scrollable) */}
+                    <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, background: '#f9fafb' }}>
+                      <h4 style={{ fontWeight: 500, color: '#374151', marginBottom: 8 }}>Past Bookings</h4>
+                      {past.length === 0 && <div style={{ color: '#6b7280', fontSize: 13 }}>No past bookings</div>}
+                      {past.map((booking) => (
+                        <div key={booking.id} style={{ borderBottom: '1px solid #e5e7eb', padding: 8 }}>
                           <div><b>Booked by:</b> {booking.bookedBy}</div>
                           <div><b>Start Date:</b> {displayDate(booking.bookingStartDate || booking.date)}</div>
                           <div><b>End Date:</b> {displayDate(booking.bookingEndDate || booking.date)}</div>
                           <div><b>Time:</b> {displayTime(booking.startTime)} - {displayTime(booking.endTime)}</div>
                           <div><b>Purpose:</b> {booking.purpose}</div>
                         </div>
-                        <button
-                          style={{ padding: '6px 14px', background: '#ef4444', color: '#fff', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 13 }} onClick={()=>handleCancelBooking(booking.bookingId)}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-
-                {/* Past Bookings (scrollable) */}
-                <div style={{ maxHeight: 200, overflowY: 'auto', border: '1px solid #e5e7eb', borderRadius: 8, padding: 8, background: '#f9fafb' }}>
-                  <h4 style={{ fontWeight: 500, color: '#374151', marginBottom: 8 }}>Past Bookings</h4>
-                  {past.length === 0 && <div style={{ color: '#6b7280', fontSize: 13 }}>No past bookings</div>}
-                  {past.map((booking) => (
-                    <div key={booking.id} style={{ borderBottom: '1px solid #e5e7eb', padding: 8 }}>
-                      <div><b>Booked by:</b> {booking.bookedBy}</div>
-                      <div><b>Start Date:</b> {displayDate(booking.bookingStartDate || booking.date)}</div>
-                      <div><b>End Date:</b> {displayDate(booking.bookingEndDate || booking.date)}</div>
-                      <div><b>Time:</b> {displayTime(booking.startTime)} - {displayTime(booking.endTime)}</div>
-                      <div><b>Purpose:</b> {booking.purpose}</div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </>
+                )}
               </div>
             )}
 

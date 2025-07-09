@@ -5,6 +5,7 @@ import { MapPin, Users, Clock, CheckCircle, XCircle, AlertTriangle } from 'lucid
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 import BookingModal from './BookingModal';
+import RoomDetailsModal from '../admin/RoomDetailsModel';
 
 const FilterCard = styled.div`
   background: #fff;
@@ -214,6 +215,7 @@ const getStatusColor = (status) => {
 };
 
 const BookingPage = () => {
+  const [showRoomDetailsModal, setShowRoomDetailsModal] = useState(false);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedRoom, setSelectedRoom] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -342,7 +344,7 @@ const BookingPage = () => {
                             )}
                           </FeaturesList>
                           <BookButton
-                            onClick={() => { setSelectedRoom(room); setShowBookingModal(true); }}
+                            onClick={() => { setSelectedRoom(room); setShowRoomDetailsModal(true); }}
                             disabled={status === 'unavailable'}
                             available={status === 'available'||status === 'booked'}
                           >
@@ -386,7 +388,7 @@ const BookingPage = () => {
                             )}
                           </FeaturesList>
                           <BookButton
-                            onClick={() => { setSelectedRoom(room); setShowBookingModal(true); }}
+                            onClick={() => { setSelectedRoom(room); setShowRoomDetailsModal(true); }}
                             disabled={status === 'unavailable'}
                             available={status === 'available'||status === 'booked'}
                           >
@@ -413,6 +415,17 @@ const BookingPage = () => {
           ))
         )}
       </BlueprintContainer>
+      {/* Room Details Modal (user view) */}
+      {showRoomDetailsModal && selectedRoom && (
+        <RoomDetailsModal
+          room={selectedRoom}
+          onClose={() => { setShowRoomDetailsModal(false); setSelectedRoom(null); }}
+          initialTab="details"
+          userMode={true} // Add this prop to distinguish user/admin mode if needed
+          onBookRoom={() => { setShowRoomDetailsModal(false); setShowBookingModal(true); }}
+        />
+      )}
+      {/* Booking Modal (form) */}
       {showBookingModal && selectedRoom && (
         <BookingModal
           room={selectedRoom}
