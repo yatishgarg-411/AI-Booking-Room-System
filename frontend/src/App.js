@@ -12,6 +12,7 @@ import ProfilePage from './components/shared/ProfilePage';
 import RoomDetailsModal from './components/admin/RoomDetailsModel';
 import { motion } from 'framer-motion';
 import UserDashboard from './pages/UserDashboard';
+import ProtectedRoute from './components/shared/ProtectedRoute';
 
 function App() {
   return (
@@ -22,18 +23,17 @@ function App() {
           
             <Routes>
               <Route path="/" element={<LoginPage />} />
-              <Route path='test' element={<RoomDetailsModal/>}></Route>
 
-              <Route path="/dashboard" element={<AdminDashboard />}>
+              <Route path="/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>}>
                 <Route index element={<Navigate to="overview" replace />} />
-                <Route path="overview" element={<DashboardOverview />} />
-                <Route path="rooms" element={<RoomManagement />} />
-                <Route path="analytics" element={<UsageAnalytics />} />
-                <Route path="predictions" element={<PredictionInsights />} />
-                <Route path="profile" element={<ProfilePage />}/>
+                <Route path="overview" element={<ProtectedRoute><DashboardOverview /></ProtectedRoute>} />
+                <Route path="rooms" element={<ProtectedRoute><RoomManagement /></ProtectedRoute>} />
+                <Route path="analytics" element={<ProtectedRoute><UsageAnalytics /></ProtectedRoute>} />
+                <Route path="predictions" element={<ProtectedRoute><PredictionInsights /></ProtectedRoute>} />
+                <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}/>
               </Route>
 
-              <Route path="/user/*" element={<UserDashboard />} />
+              <Route path="/user/*" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             </Routes>
 
 

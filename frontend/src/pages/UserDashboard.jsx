@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
-
+import ProtectedRoute from '../components/shared/ProtectedRoute';
 import UserSidebar from '../components/user/UserSidebar';
 import AnalyticsOverview from '../components/user/AnalyticsOverview';
 import RecentActivity from '../components/user/RecentActivity';
@@ -130,13 +130,13 @@ const UserDashboard = () => {
       <UserSidebar />
       <ContentWrapper>
         <Routes>
-          <Route index element={<DashboardOverview name={name} now={now} quote={quote} />} />
-          <Route path="dashboard" element={<DashboardOverview name={name} now={now} quote={quote} />} />
-          <Route path="booking" element={<BookingPage />} />
-          <Route path="my-bookings" element={<MyBookingsPage />} />
-          <Route path="chat" element={<ChatbotPage />} />
-          <Route path="profile" element={<ProfilePage />} />
-          <Route path="*" element={<Navigate to="/user" replace />} />
+          <Route index element={<ProtectedRoute><DashboardOverview name={name} now={now} quote={quote} /></ProtectedRoute>} />
+          <Route path="dashboard" element={<ProtectedRoute><DashboardOverview name={name} now={now} quote={quote} /></ProtectedRoute>} />
+          <Route path="booking" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+          <Route path="my-bookings" element={<ProtectedRoute><MyBookingsPage /></ProtectedRoute>} />
+          <Route path="chat" element={<ProtectedRoute><ChatbotPage /></ProtectedRoute>} />
+          <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="*" element={<ProtectedRoute><Navigate to="/user" replace /></ProtectedRoute>} />
         </Routes>
       </ContentWrapper>
     </DashboardContainer>
