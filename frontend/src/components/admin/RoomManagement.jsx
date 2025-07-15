@@ -111,9 +111,11 @@ const RoomManagement = () => {
   };
 
   const filteredRooms = rooms.filter((room) => {
-    const matchesSearch = room.features.some(feature => 
-      feature.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const matchesSearch =
+      !searchTerm ||
+      room.features.some(feature =>
+        feature.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     const matchesFloor = !filterFloor || room.floor.toString() === filterFloor;
     return matchesSearch && matchesFloor;
   });

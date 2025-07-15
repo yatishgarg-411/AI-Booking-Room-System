@@ -32,7 +32,7 @@ function displayTime(timeStr) {
 const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom}) => {
   console.log(initialTab);
   const { fetchRooms, fetchBookings, bookings, setRoomStatus, getComputedRoomStatus, addActivity } = useData();
-  const { user } = useAuth();
+  const { email } = useAuth();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState(initialTab);//Initially Room Details Tab Appears by default
   const [showExtendModal, setShowExtendModal] = useState(false);//TO Toggle extend booking form
@@ -46,7 +46,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
   const [statusColor, setStatusColor] = useState({ background: '#d1fae5', color: '#065f46', border: '1px solid #bbf7d0' });
   // Prefill booking form with user email if userMode
   const [bookingForm, setBookingForm] = useState({
-    bookedBy: userMode ? (user?.email || '') : (user?.email || ''),
+    bookedBy: email || '',
     bookingStartDate: '',
     bookingEndDate: '',
     startTime: '',
@@ -204,7 +204,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'released',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Released ${room.name} early`,
         bookingDetails: {
           originalEndDate: ongoing.bookingEndDate || ongoing.date,
@@ -238,7 +238,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'cancelled',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Cancelled booking for ${room.name}`,
         bookingDetails: cancelledBooking ? {
           startDate: cancelledBooking.bookingStartDate || cancelledBooking.date,
@@ -291,7 +291,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'extended',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Extended booking for ${room.name} until ${extendDate} ${extendTime}`,
         bookingDetails: {
           originalEndDate: ongoing.bookingEndDate || ongoing.date,
@@ -333,7 +333,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
       setBookingSuccess('Room booked successfully!');
       setShowBookModal(false);
       setBookingForm({
-        bookedBy: user?.email || '',
+        bookedBy: email || '',
         bookingStartDate: '',
         bookingEndDate: '',
         startTime: '',
@@ -347,7 +347,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'created',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'User',
         details: `Booked ${room.name} for ${bookingForm.purpose}`,
         bookingDetails: {
           startDate: bookingForm.bookingStartDate,
@@ -477,7 +477,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'updated',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Updated settings for ${room.name}`,
         changes: {
           previousFeatures: room.features,
@@ -511,7 +511,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'marked_unavailable',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Marked ${room.name} as unavailable`,
         changes: {
           previousStatus: computedStatus,
@@ -543,7 +543,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         action: 'marked_available',
         roomName: room.name,
         roomId: room.id,
-        user: user?.email || 'Admin',
+        user: email || 'Admin',
         details: `Marked ${room.name} as available`,
         changes: {
           previousStatus: 'unavailable',
@@ -583,7 +583,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         >
 
 
-          {/* Header Of Container */ }
+          {/* Header Of Container */}
           <div style={styles.header}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <div style={{ width: 16, height: 16, borderRadius: 9999, ...statusColor, animation: 'pulse 2s infinite' }}></div>

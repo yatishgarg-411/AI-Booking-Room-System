@@ -2,15 +2,21 @@ import React from 'react';
 import styled from 'styled-components';
 import { User as UserIcon, Mail, LogOut, Heart } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { useData } from '../../contexts/DataContext';
 import {  useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
   const navigate=useNavigate();
-    const { name, email,setToken } = useAuth();
+  const { name, email, setToken } = useAuth();
+  const { recentActivity } = useData();
   const logout = () =>{
     setToken('');
     navigate('/');
   }
+
+  // Filter activities for this user
+  const userActivities = recentActivity.filter(activity => activity.user === email);
+  const latestActivities = userActivities.slice(0, 5);
 
   return (
     <Bg>
@@ -23,6 +29,24 @@ const ProfilePage = () => {
         <LogoutButton onClick={logout}>
           <LogOut size={18} style={{marginRight:8}} /> Logout
         </LogoutButton>
+
+        {/* Recent Activity Section */}
+        <div style={{ marginTop: '2rem', width: '100%' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: '#3730a3', marginBottom: 12 }}>Recent Activity</h3>
+          {latestActivities.length === 0 ? (
+            <div style={{ color: '#64748b', fontSize: 14 }}>No recent activity found.</div>
+          ) : (
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              {latestActivities.map((activity, idx) => (
+                <li key={idx} style={{ background: '#f3f4f6', borderRadius: 8, padding: '10px 14px', marginBottom: 8, color: '#374151', fontSize: 14 }}>
+                  <div><b>{activity.type}</b> - {activity.action}</div>
+                  <div style={{ fontSize: 13, color: '#6b7280' }}>{activity.details}</div>
+                  <div style={{ fontSize: 12, color: '#9ca3af', marginTop: 2 }}>{new Date(activity.timestamp).toLocaleString()}</div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </CenterCard>
       <Footer>
         Made with <Heart size={16} color="#ef4444" style={{margin:'0 4px'}}/> by Yatish and Akshita
