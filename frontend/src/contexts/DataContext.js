@@ -44,7 +44,8 @@ export const DataProvider = ({ children }) => {
 
   const fetchRooms = async () => {
     try{
-      const res= await axios.get(`http://localhost:8000/rooms`);
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const res= await axios.get(`${API_URL}/rooms`);
       setRooms(res.data);
       // Removed setTimeout-based updateAnalytics
     }catch(error){
@@ -59,7 +60,8 @@ export const DataProvider = ({ children }) => {
 
   const fetchBookings = async () => {
     try{
-      const res= await axios.get(`http://localhost:8000/room/bookings/all`);
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const res= await axios.get(`${API_URL}/room/bookings/all`);
       setBookings(res.data);
       // Removed setTimeout-based updateAnalytics
     }catch(error){
@@ -158,7 +160,8 @@ export const DataProvider = ({ children }) => {
   const setRoomStatus = async (roomId, status) => {
     try {
       // Update backend
-      await axios.patch(`http://localhost:8000/room/update/${roomId}`, { status });
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      await axios.patch(`${API_URL}/room/update/${roomId}`, { status });
       
       // Update local state
       setRooms(prev =>
@@ -244,7 +247,8 @@ export const DataProvider = ({ children }) => {
     
     try {
       // Send to backend
-      const response = await axios.post('http://localhost:8000/recentactivity/post', newActivity);
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const response = await axios.post(`${API_URL}/recentactivity/post`, newActivity);
       console.log('Activity saved to backend:', response.data);
       
       // Update local state
@@ -274,7 +278,8 @@ export const DataProvider = ({ children }) => {
   const fetchActivities = async () => {
     try {
       console.log('Fetching activities from backend...');
-      const response = await axios.get('http://localhost:8000/recentactivity/all');
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+      const response = await axios.get(`${API_URL}/recentactivity/all`);
       console.log('Activities fetched:', response.data);
       setRecentActivity(response.data);
     } catch (error) {

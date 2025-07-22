@@ -166,11 +166,15 @@ async def addHistory(notify: History):
         activity_data = notify.dict()
         result = await history_notifications.insert_one(activity_data)
         
-        # Return the created activity with ID
-        activity_data['id'] = str(result.inserted_id)
+        # Fetch the inserted document
+        inserted = await history_notifications.find_one({'_id': result.inserted_id})
+        # Convert _id to id (string) and remove _id
+        if inserted and '_id' in inserted:
+            inserted['id'] = str(inserted['_id'])
+            del inserted['_id']
         return {
             "msg": "Activity logged successfully",
-            "activity": activity_data
+            "activity": inserted
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to log activity: {str(e)}")

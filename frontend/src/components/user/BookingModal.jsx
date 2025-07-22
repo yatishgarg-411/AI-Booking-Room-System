@@ -5,9 +5,10 @@ import axios from 'axios';
 import { useData } from '../../contexts/DataContext';
 import { useAuth } from '../../contexts/AuthContext';
 // Helper to log recent activity
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 async function logRecentActivity(activity) {
   try {
-    await axios.post('http://localhost:8000/recentactivity/post', activity);
+    await axios.post(`${API_URL}/recentactivity/post`, activity);
   } catch (err) {
     // Optionally handle/log error
     console.error('Failed to log activity:', err);
@@ -131,7 +132,7 @@ const BookingModal = ({ room, onClose }) => {
         endTime: form.timeEnd.length === 5 ? form.timeEnd + ':00' : form.timeEnd,
         purpose: form.purpose,
       };
-      await axios.post('http://localhost:8000/room/booking', payload);
+      await axios.post(`${API_URL}/room/booking`, payload);
       // Log activity
       await logRecentActivity({
         type: 'booking',

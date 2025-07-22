@@ -8,12 +8,14 @@ export const AuthProvider = ({ children }) => {
   const[name, setName] = useState("");
   const[email, setEmail] = useState("");
 
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
   const fetchUsername = async ()=>{
     try{
       const decodedToken = jwtDecode(token);
       const useremail=decodedToken.email
       setEmail(useremail);
-      const res= await axios .get(`http://localhost:8000/username/${useremail}`);
+      const res= await axios .get(`${API_URL}/username/${useremail}`);
        setName( res.data.name );
     }catch(error){
       if(error.response && error.response.status === 404) {

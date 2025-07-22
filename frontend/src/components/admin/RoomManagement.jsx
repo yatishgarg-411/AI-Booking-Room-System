@@ -114,8 +114,8 @@ const RoomManagement = () => {
     const matchesSearch =
       !searchTerm ||
       room.features.some(feature =>
-        feature.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      feature.toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const matchesFloor = !filterFloor || room.floor.toString() === filterFloor;
     return matchesSearch && matchesFloor;
   });

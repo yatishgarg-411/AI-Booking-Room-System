@@ -64,6 +64,8 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
   const [localStatus, setLocalStatus] = useState(room.status);
   const [roomStatus, setLocalRoomStatus] = useState(room.status);
 
+  const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
   // Helper: get all bookings for this room
   useEffect(() => {
     const filtered = bookings.filter(b => b.roomId === room.id || b.room_name === room.name);
@@ -194,7 +196,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
       const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
   
       await axios.patch(
-        `http://localhost:8000/booking/update/${ongoing.bookingId}`,
+        `${API_URL}/booking/update/${ongoing.bookingId}`,
         { 'endTime': currentTime, 'bookingEndDate': today }
       );
 
@@ -226,7 +228,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
 
   const handleCancelBooking = async (id) =>{
     try{
-      const res= await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
+      const res= await axios.delete(`${API_URL}/room/booking/delete/${id}`);
       alert(res.data.msg);
       
       // Find the booking details for activity logging
@@ -278,7 +280,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
     // PATCH request
     try {
       await axios.patch(
-        `http://localhost:8000/booking/update/${ongoing.bookingId}`,
+        `${API_URL}/booking/update/${ongoing.bookingId}`,
         { endTime: extendTime, bookingEndDate: extendDate }
       );
       setShowExtendModal(false);
@@ -329,7 +331,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
         endTime: bookingForm.endTime.length === 5 ? bookingForm.endTime + ':00' : bookingForm.endTime,
         purpose: bookingForm.purpose,
       };
-      await axios.post('http://localhost:8000/room/booking', payload);
+      await axios.post(`${API_URL}/room/booking`, payload);
       setBookingSuccess('Room booked successfully!');
       setShowBookModal(false);
       setBookingForm({
@@ -463,7 +465,7 @@ const RoomDetailsModal = ({room,onClose,initialTab,userMode = false,onBookRoom})
     setSaving(true);
     setSaveSuccess('');
     try {
-      await axios.patch(`http://localhost:8000/room/update/${room.id}`, {
+      await axios.patch(`${API_URL}/room/update/${room.id}`, {
         status: localStatus,
         features: roomFeatures
       });

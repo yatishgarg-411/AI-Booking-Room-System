@@ -312,7 +312,8 @@ const LoginPage = () => {
         role: 'user'
       });
       try {
-        const res = await axios.post(`http://localhost:8000/${formData.role}/login`, loginForm);
+        const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+        const res = await axios.post(`${API_URL}/${formData.role}/login`, loginForm);
         alert(res.data.msg);
         setToken(res.data.token);
         if(formData.role ==='admin'){navigate('/dashboard');}
@@ -340,7 +341,8 @@ const LoginPage = () => {
         role: 'user'
       });
       try {
-        const res = await axios.post(`http://localhost:8000/${formData.role}/signup`, signupForm);
+        const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+        const res = await axios.post(`${API_URL}/${formData.role}/signup`, signupForm);
         alert(res.data.msg);
       } catch (error) {
         if (error.response && error.response.status === 404) {

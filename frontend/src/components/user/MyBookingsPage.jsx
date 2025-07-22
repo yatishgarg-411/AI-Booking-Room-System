@@ -165,9 +165,10 @@ const EmptyIcon = styled.div`
 `;
 
 // Helper to log recent activity
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
 async function logRecentActivity(activity) {
   try {
-    await axios.post('http://localhost:8000/recentactivity/post', activity);
+    await axios.post(`${API_URL}/recentactivity/post`, activity);
   } catch (err) {
     // Optionally handle/log error
     console.error('Failed to log activity:', err);
@@ -230,7 +231,7 @@ const MyBookingsPage = () => {
   // Cancel handler
   const HandleCancel = async (id) => {
     try {
-      const res = await axios.delete(`http://localhost:8000/room/booking/delete/${id}`);
+      const res = await axios.delete(`${API_URL}/room/booking/delete/${id}`);
       alert(res.data.msg);
       const cancelledBooking = bookings.find(b => b.bookingId === id);
       if (cancelledBooking) {
