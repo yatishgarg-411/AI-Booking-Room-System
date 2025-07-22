@@ -7,7 +7,7 @@ app=FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000","https://hotel-booking-room-system-1.onrender.com"],  # React frontend
+    allow_origins=["http://localhost:3000","hotel-booking-room-system.vercel.app"],  # React frontend
     allow_credentials=True,
     allow_methods=["*"],  # GET, POST, PUT, DELETE, etc.
     allow_headers=["*"],  # Authorization, Content-Type, etc.
